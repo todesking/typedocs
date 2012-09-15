@@ -1,6 +1,6 @@
-# Typedocs
+# Typedocs : Human/Machine readable method specifications
 
-TODO: Write a gem description
+The goal of the project is to provide user-friendly type annotations for Ruby.
 
 ## Installation
 
@@ -18,7 +18,27 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### Method type annotations
+
+    class X
+      include Typedocs::DSL
+
+      tdoc!"Numeric -> Numeric"
+      def self.square x
+        x * x
+      end
+    end
+
+    X.square 10
+    # => 100
+
+    X.square '100'
+    # Typedocs::TypeMissmatch: Argument x is not Numeric('100')
+
+
+    Typedocs.check_nothing
+    X.square '100'
+    # TypeError: can't convert String into Integer
 
 ## Contributing
 
@@ -27,3 +47,30 @@ TODO: Write usage instructions here
 3. Commit your changes (`git commit -am 'Added some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
 5. Create new Pull Request
+
+## TODO
+
+    Method spec definitions:
+      foo(arg1, arrg2 = default_value)
+      foo(arg1, *rest)
+    Basic validations:
+      Types
+        is_a
+        *(any)
+        Arry([])
+        Array shorthand(...)
+        Hash
+        --(Dont care)
+      Values
+        Integer(>0)
+        String(not .empty?)
+      Named specs
+        @positive_int
+      
+    Method override
+
+
+* * * * *
+
+
+    vim: set shiftwidth=2 expandtab:
