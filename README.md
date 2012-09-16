@@ -20,6 +20,8 @@ Or install it yourself as:
 
 ### Method type annotations
 
+Some of features is not implemented.
+
     class X
       include Typedocs::DSL
 
@@ -58,9 +60,7 @@ Or install it yourself as:
       foo(*args) # many valid patterns
     Basic validations:
       Types
-        *(any)
-        Arry([])
-        Array shorthand(...)
+        Array (...)
         Hash
         --(Dont care)
       Values
@@ -68,8 +68,8 @@ Or install it yourself as:
         String(not .empty?)
       Named specs
         @positive_int
-
     Method override
+    Disable checking
 
 
 * * * * *

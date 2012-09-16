@@ -71,8 +71,13 @@ describe Typedocs::DSL::Parser do
       it { should be_valid(1) }
       it { should_not be_valid('string') }
     end
-    describe 'dont care' do
+    describe 'dont care(implicit)' do
       subject { spec_for '' }
+      it { should be_valid(1) }
+      it { should be_valid(nil) }
+    end
+    describe 'dont carre(explicit)' do
+      subject { spec_for '--' }
       it { should be_valid(1) }
       it { should be_valid(nil) }
     end

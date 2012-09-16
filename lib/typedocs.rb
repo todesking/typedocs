@@ -87,7 +87,7 @@ module Typedocs
           ret << Validator::Type.for(klass)
         elsif match /\*/
           ret << Validator::Any.instance
-        elsif check /->/
+        elsif check /->/ or match /--/
           ret << Validator::DontCare.instance
         elsif match /\[/
           specs = []
