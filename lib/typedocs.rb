@@ -48,7 +48,7 @@ module Typedocs
     end
 
     def self.parse doc
-      Typedocs::DSL::Parser.new(doc).parse
+      Typedocs::Parser.new(doc).parse
     end
 
     def self.decorate(klass, name, tdoc_def)
@@ -61,163 +61,163 @@ module Typedocs
         end
       end
     end
+  end
 
-    class Parser
-      def initialize src
-        @src = StringScanner.new(src)
+  class Parser
+    def initialize src
+      @src = StringScanner.new(src)
+    end
+
+    # This is blueprint, not specification of current state.
+    #   method_spec := arg_spec? ('->' arg_spec?)*
+    #   arg_spec    := (spec) | spec '|' spec | atom | composite
+    #   atom        := type('(' value_specs ')')?
+    #   type        := type_name | any | dont_care | nil
+    #   dont_care   := '--'
+    #   value_specs := expression (',' expression)*
+    #   composite   := array | struct_array | hash
+    #   array  := spec...
+    #   struct_array := [spec(, spec)*]
+    #   hash        := {key_pattern: spec(, key_pattern: spec)*}
+    #   key_pattern := '?'? ( lit_symbol | lit_string | number )
+    def parse
+      return read_method_spec
+    end
+
+    private
+    def read_method_spec
+      arg_specs = []
+      until eos?
+        skip_spaces
+
+        arg_specs << read_arg_spec!
+
+        skip_spaces
+        read_allow!
       end
 
-      # This is blueprint, not specification of current state.
-      #   method_spec := arg_spec? ('->' arg_spec?)*
-      #   arg_spec    := (spec) | spec '|' spec | atom | composite
-      #   atom        := type('(' value_specs ')')?
-      #   type        := type_name | any | dont_care | nil
-      #   dont_care   := '--'
-      #   value_specs := expression (',' expression)*
-      #   composite   := array | struct_array | hash
-      #   array  := spec...
-      #   struct_array := [spec(, spec)*]
-      #   hash        := {key_pattern: spec(, key_pattern: spec)*}
-      #   key_pattern := '?'? ( lit_symbol | lit_string | number )
-      def parse
-        return read_method_spec
+      arg_specs = [Validator::DontCare.instance] if arg_specs.empty?
+
+      return MethodSpec.new arg_specs[0..-2], arg_specs[-1]
+    end
+
+    def read_arg_spec!
+      ret = []
+      if match /[A-Z]\w+/ 
+        klass = const_get_from ::Kernel, matched.strip
+        ret << Validator::Type.for(klass)
+      elsif match /\*/
+        ret << Validator::Any.instance
+      elsif check /->/ or match /--/
+        ret << Validator::DontCare.instance
+      elsif match /\[/
+        specs = []
+        begin
+          skip_spaces
+          break if check /\]/
+          specs << read_arg_spec!
+          skip_spaces
+        end while match /,/
+        skip_spaces
+        match /\]/ || (raise error_message :array_end)
+        ret << Validator::ArrayAsStruct.new(specs)
+      elsif match /{/
+        entries = []
+        begin
+          skip_spaces
+          break if check /}/
+          entries << read_hash_entry!
+          skip_spaces
+        end while match /,/
+        match /}/ || (raise error_message :hash_end)
+        ret << Validator::Hash.new(entries)
+      elsif match /nil/
+        ret << Validator::Nil.instance
+      else
+        raise error_message :arg_spec
+      end
+      raise "Assertion error: #{current_source_info}" if ret.empty?
+
+      if match /\.\.\./
+        ret = [Validator::Array.new(ret.first)]
       end
 
-      private
-      def read_method_spec
-        arg_specs = []
-        until eos?
-          skip_spaces
-
-          arg_specs << read_arg_spec!
-
-          skip_spaces
-          read_allow!
-        end
-
-        arg_specs = [Validator::DontCare.instance] if arg_specs.empty?
-
-        return MethodSpec.new arg_specs[0..-2], arg_specs[-1]
+      # TODO: Could be optimize(for multiple or)
+      skip_spaces
+      while match /\|/
+        skip_spaces
+        ret << read_arg_spec!
+        skip_spaces
       end
 
-      def read_arg_spec!
-        ret = []
-        if match /[A-Z]\w+/ 
-          klass = const_get_from ::Kernel, matched.strip
-          ret << Validator::Type.for(klass)
-        elsif match /\*/
-          ret << Validator::Any.instance
-        elsif check /->/ or match /--/
-          ret << Validator::DontCare.instance
-        elsif match /\[/
-          specs = []
-          begin
-            skip_spaces
-            break if check /\]/
-            specs << read_arg_spec!
-            skip_spaces
-          end while match /,/
-          skip_spaces
-          match /\]/ || (raise error_message :array_end)
-          ret << Validator::ArrayAsStruct.new(specs)
-        elsif match /{/
-          entries = []
-          begin
-            skip_spaces
-            break if check /}/
-            entries << read_hash_entry!
-            skip_spaces
-          end while match /,/
-          match /}/ || (raise error_message :hash_end)
-          ret << Validator::Hash.new(entries)
-        elsif match /nil/
-          ret << Validator::Nil.instance
+      return ret.first if ret.size == 1
+
+      return Validator::Or.new(ret)
+
+      raise "Should not reach here: #{current_source_info}"
+    end
+
+    def read_hash_entry!
+      key = read_hash_key!
+      skip_spaces
+      match /:/ || (raise error_message :hash_colon)
+      skip_spaces
+      spec = read_arg_spec!
+
+      [key, spec]
+    end
+
+    def read_hash_key!
+      if match /[a-zA-Z]\w*[?!]?/
+        matched.to_sym
+      elsif match /['"]/
+        terminator = matched
+        if match /([^\\#{terminator}]|\\.)*#{terminator}/
+          matched[0..-2]
         else
-          raise error_message :arg_spec
+          raise error_message :hash_key_string
         end
-        raise "Assertion error: #{current_source_info}" if ret.empty?
-
-        if match /\.\.\./
-          ret = [Validator::Array.new(ret.first)]
-        end
-
-        # TODO: Could be optimize(for multiple or)
-        skip_spaces
-        while match /\|/
-          skip_spaces
-          ret << read_arg_spec!
-          skip_spaces
-        end
-
-        return ret.first if ret.size == 1
-
-        return Validator::Or.new(ret)
-
-        raise "Should not reach here: #{current_source_info}"
+      else
+        raise error_message :hash_key
       end
+    end
 
-      def read_hash_entry!
-        key = read_hash_key!
-        skip_spaces
-        match /:/ || (raise error_message :hash_colon)
-        skip_spaces
-        spec = read_arg_spec!
+    def read_allow!
+      match /->/ || (raise error_message :allow)
+    end
 
-        [key, spec]
+    def error_message expected
+      "parse error(expected: #{expected}) #{current_source_info}"
+    end
+
+    def current_source_info
+      "src = #{@src.string.inspect}, error at: #{@src.string[@src.pos..(@src.pos+30)]}"
+    end
+
+    def const_get_from root, name
+      name.split(/::/).inject(root) do|root, name|
+        root.const_get(name.to_sym)
       end
+    end
 
-      def read_hash_key!
-        if match /[a-zA-Z]\w*[?!]?/
-          matched.to_sym
-        elsif match /['"]/
-          terminator = matched
-          if match /([^\\#{terminator}]|\\.)*#{terminator}/
-            matched[0..-2]
-          else
-            raise error_message :hash_key_string
-          end
-        else
-          raise error_message :hash_key
-        end
-      end
+    def skip_spaces
+      match /\s*/
+    end
 
-      def read_allow!
-        match /->/ || (raise error_message :allow)
-      end
+    def match pat
+      @src.scan pat
+    end
 
-      def error_message expected
-        "parse error(expected: #{expected}) #{current_source_info}"
-      end
+    def matched
+      @src.matched
+    end
 
-      def current_source_info
-        "src = #{@src.string.inspect}, error at: #{@src.string[@src.pos..(@src.pos+30)]}"
-      end
+    def check(pat)
+      @src.check pat
+    end
 
-      def const_get_from root, name
-        name.split(/::/).inject(root) do|root, name|
-          root.const_get(name.to_sym)
-        end
-      end
-
-      def skip_spaces
-        match /\s*/
-      end
-
-      def match pat
-        @src.scan pat
-      end
-
-      def matched
-        @src.matched
-      end
-
-      def check(pat)
-        @src.check pat
-      end
-
-      def eos?
-        @src.eos?
-      end
+    def eos?
+      @src.eos?
     end
   end
 

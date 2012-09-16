@@ -79,7 +79,7 @@ describe do
   end
 end
 
-describe Typedocs::DSL::Parser do
+describe Typedocs::Parser do
   def spec_for(src)
     Typedocs::DSL.parse(src).retval_spec
   end
