@@ -27,19 +27,25 @@ describe X do
 end
 
 describe Typedocs::DSL::Parser do
-  describe 'src has single param: Numeric' do
-    subject { Typedocs::DSL.parse('Numeric').retval_spec }
-    it { should be_valid(1) }
-    it { should_not be_valid('string') }
+  def spec_for(src)
+    Typedocs::DSL.parse(src).retval_spec
   end
-  describe 'src has sinble param: String' do
-    subject { Typedocs::DSL.parse('String').retval_spec }
-    it { should be_valid('string') }
-    it { should_not be_valid(1) }
-  end
-
-  describe 'src has two params: String, Numeric' do
-    subject { Typedocs::DSL::Parser.parse('String -> Numeric') }
+  describe 'parsing arg/retval spec' do
+    describe 'is-a' do
+      subject { spec_for 'Numeric' }
+      it { should be_valid(1) }
+      it { should_not be_valid('string') }
+    end
+    describe 'dont care' do
+      subject { spec_for '' }
+      it { should be_valid(1) }
+      it { should be_valid(nil) }
+    end
+    describe 'anything' do
+      subject { spec_for '*' }
+      it { should be_valid(1) }
+      it { should be_valid(nil) }
+    end
   end
 end
 

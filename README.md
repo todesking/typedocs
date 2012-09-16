@@ -53,9 +53,11 @@ Or install it yourself as:
     Method spec definitions:
       foo(arg1, arrg2 = default_value)
       foo(arg1, *rest)
+      foo(arg1, &block)
+      foo() # but block needed
+      foo(*args) # many valid patterns
     Basic validations:
       Types
-        is_a
         *(any)
         Arry([])
         Array shorthand(...)
@@ -66,7 +68,7 @@ Or install it yourself as:
         String(not .empty?)
       Named specs
         @positive_int
-      
+
     Method override
 
 

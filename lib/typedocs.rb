@@ -74,6 +74,8 @@ module Typedocs
           read_allow!
         end
 
+        arg_specs = [Validator::DontCare.instance] if arg_specs.empty?
+
         return MethodSpec.new arg_specs[0..-2], arg_specs[-1]
       end
 
@@ -81,6 +83,8 @@ module Typedocs
         if match /[A-Z]\w+\s*/ 
           klass = const_get_from ::Kernel, matched.strip
           return Validator::Type.for(klass)
+        elsif match /\*\s*/
+          return Validator::Any.instance
         elsif check /->/
           return Validator::DontCare.instance
         else
@@ -165,6 +169,15 @@ module Typedocs
     end
 
     class DontCare < Validator
+      def self.instance
+        @instance ||= new
+      end
+      def valid?(obj)
+        true
+      end
+    end
+
+    class Any < Validator
       def self.instance
         @instance ||= new
       end
