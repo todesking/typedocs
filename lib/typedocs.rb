@@ -47,17 +47,18 @@ module Typedocs
         @src = StringScanner.new(src)
       end
 
-      # method_spec := arg_spec? ('->' arg_spec?)*
-      # arg_spec    := (spec) | spec '|' spec | atom | composite
-      # atom        := type('(' value_specs ')')?
-      # type        := type_name | any | dont_care | nil
-      # dont_care   := '--'
-      # value_specs := expression (',' expression)*
-      # composite   := free_array | const_array | hash
-      # free_array  := spec...
-      # const_array := [spec(, spec)*]
-      # hash        := {key_pattern: spec(, key_pattern: spec)*}
-      # key_pattern := lit_symbol | lit_string | number
+      # This is blueprint, not specification of current state.
+      #   method_spec := arg_spec? ('->' arg_spec?)*
+      #   arg_spec    := (spec) | spec '|' spec | atom | composite
+      #   atom        := type('(' value_specs ')')?
+      #   type        := type_name | any | dont_care | nil
+      #   dont_care   := '--'
+      #   value_specs := expression (',' expression)*
+      #   composite   := free_array | const_array | hash
+      #   free_array  := spec...
+      #   const_array := [spec(, spec)*]
+      #   hash        := {key_pattern: spec(, key_pattern: spec)*}
+      #   key_pattern := lit_symbol | lit_string | number
       def parse
         return read_method_spec
       end
@@ -87,9 +88,21 @@ module Typedocs
           return Validator::Any.instance
         elsif check /->/
           return Validator::DontCare.instance
+        elsif match /\[/
+          specs = []
+          begin
+            skip_spaces
+            break if check /\]/
+            specs << read_arg_spec!
+            skip_spaces
+          end while match /,/
+          skip_spaces
+          match /\]/ || (raise error_message :right_bracket)
+          return Validator::ArrayAsStruct.new(specs)
         else
           raise error_message :arg_spec
         end
+        raise "Should not reach here: #{current_source_info}"
       end
 
       def read_allow!
@@ -97,7 +110,11 @@ module Typedocs
       end
 
       def error_message expected
-        "parse error(expected: #{expected}) src = #{@src.string.inspect}, error at: #{@src.string[@src.pos..(@src.pos+30)]}"
+        "parse error(expected: #{expected}) #{current_source_info}"
+      end
+
+      def current_source_info
+        "src = #{@src.string.inspect}, error at: #{@src.string[@src.pos..(@src.pos+30)]}"
       end
 
       def const_get_from root, name
@@ -197,6 +214,20 @@ module Typedocs
 
       def valid?(obj)
         obj.is_a? @klass
+      end
+    end
+
+    class ArrayAsStruct < Validator
+      def initialize(specs)
+        @specs = specs
+      end
+
+      def valid?(obj)
+        [
+          obj.is_a?(Array),
+          @specs.size == obj.size,
+          @specs.zip(obj).all?{|spec,elm| spec.valid?(elm)},
+        ].all?
       end
     end
   end

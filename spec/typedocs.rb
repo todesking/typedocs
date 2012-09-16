@@ -12,6 +12,16 @@ class X
   def expected_string_but_nil
     nil
   end
+
+  tdoc!"Numeric -> [Integer,String]"
+  def return_pair(num)
+    [num.to_i, num.to_s]
+  end
+
+  tdoc!"[]"
+  def return_empty_array
+    []
+  end
 end
 
 describe X do
@@ -23,6 +33,13 @@ describe X do
   end
   it do
     expect { X.new.expected_string_but_nil }.to raise_error Typedocs::RetValError
+  end
+  it do
+    X.new.return_pair(1).should == [1, '1']
+  end
+
+  it do
+    X.new.return_empty_array.should == []
   end
 end
 
@@ -45,6 +62,19 @@ describe Typedocs::DSL::Parser do
       subject { spec_for '*' }
       it { should be_valid(1) }
       it { should be_valid(nil) }
+    end
+    describe 'Array(as struct)' do
+      subject { spec_for '[String, Symbol]' }
+      it { should be_valid(['hoge', :foo]) }
+      it { should_not be_valid(['hoge', 'hoge']) }
+      it { should_not be_valid([nil, :foo]) }
+      it { should_not be_valid(['hoge', :foo, :bar]) }
+
+      describe 'when empty' do
+        subject { spec_for '[]' }
+        it { should be_valid([]) }
+        it { should_not be_valid([nil]) }
+      end
     end
   end
 end
