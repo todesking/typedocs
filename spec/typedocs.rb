@@ -27,6 +27,11 @@ class X
   def return_int_or_string(is_str)
     is_str ? 'string' : 100
   end
+
+  tdoc!"nil"
+  def return_nil
+    nil
+  end
 end
 
 describe X do
@@ -50,6 +55,9 @@ describe X do
   it do
     X.new.return_int_or_string(true).should == 'string'
     X.new.return_int_or_string(false).should == 100
+  end
+  it do
+    X.new.return_nil.should == nil
   end
 end
 
@@ -92,6 +100,11 @@ describe Typedocs::DSL::Parser do
         it { should be_valid(:aaa) }
         it { should be_valid(100) }
         it { should_not be_valid(1.0) }
+    end
+    describe 'nil' do
+      subject { spec_for 'nil' }
+      it { should be_valid(nil) }
+      it { should_not be_valid(1) }
     end
   end
 end

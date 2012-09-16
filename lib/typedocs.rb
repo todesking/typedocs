@@ -82,10 +82,10 @@ module Typedocs
 
       def read_arg_spec!
         ret = []
-        if match /[A-Z]\w+\s*/ 
+        if match /[A-Z]\w+/ 
           klass = const_get_from ::Kernel, matched.strip
           ret << Validator::Type.for(klass)
-        elsif match /\*\s*/
+        elsif match /\*/
           ret << Validator::Any.instance
         elsif check /->/
           ret << Validator::DontCare.instance
@@ -100,6 +100,8 @@ module Typedocs
           skip_spaces
           match /\]/ || (raise error_message :right_bracket)
           ret << Validator::ArrayAsStruct.new(specs)
+        elsif match /nil/
+          ret << Validator::Nil.instance
         else
           raise error_message :arg_spec
         end
@@ -229,6 +231,15 @@ module Typedocs
 
       def valid?(obj)
         obj.is_a? @klass
+      end
+    end
+
+    class Nil < Validator
+      def self.instance
+        @instance ||= new
+      end
+      def valid?(obj)
+        obj.nil?
       end
     end
 
