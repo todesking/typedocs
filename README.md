@@ -60,14 +60,13 @@ Some of features is not implemented.
       foo(*args) # many valid patterns
     Basic validations:
       Types
-        Array (...)
         Hash
-        --(Dont care)
       Values
         Integer(>0)
         String(not .empty?)
       Named specs
         @positive_int
+    Informative error message
     Method override
     Disable checking
 

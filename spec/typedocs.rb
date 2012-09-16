@@ -111,6 +111,12 @@ describe Typedocs::DSL::Parser do
       it { should be_valid(nil) }
       it { should_not be_valid(1) }
     end
+    describe '...' do
+      subject { spec_for 'Integer...' }
+      it { should be_valid([1,2,3]) }
+      it { should be_valid([]) }
+      it { should_not be_valid(['a']) }
+    end
   end
 end
 

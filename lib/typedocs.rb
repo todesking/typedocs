@@ -107,6 +107,10 @@ module Typedocs
         end
         raise "Assertion error: #{current_source_info}" if ret.empty?
 
+        if match /\.\.\./
+          ret = [Validator::Array.new(ret.first)]
+        end
+
         # TODO: Could be optimize(for multiple or)
         skip_spaces
         while match /\|/
@@ -250,9 +254,21 @@ module Typedocs
 
       def valid?(obj)
         [
-          obj.is_a?(Array),
+          obj.is_a?(::Array),
           @specs.size == obj.size,
           @specs.zip(obj).all?{|spec,elm| spec.valid?(elm)},
+        ].all?
+      end
+    end
+
+    class Array < Validator
+      def initialize(spec)
+        @spec = spec
+      end
+      def valid?(obj)
+        [
+          obj.is_a?(::Array),
+          obj.all?{|elm| @spec.valid?(elm)},
         ].all?
       end
     end
