@@ -3,26 +3,46 @@ require "typedocs/version"
 require 'strscan'
 
 module Typedocs
+
   module DSL
+    @enabled = true
+
+    def self.do_nothing
+      @enabled = false
+    end
+
+    def self.do_anything
+      @enabled = true
+    end
+
+    def self.enabled?
+      @enabled
+    end
 
     def self.included(klass)
       klass.extend ClassMethods
 
       @typedocs_current_def = nil
 
-      class << klass
-        def tdoc!(doc_str)
-          @typedocs_current_def = ::Typedocs::DSL.parse doc_str
+      if Typedocs::DSL.enabled?
+        class << klass
+          def tdoc!(doc_str)
+            @typedocs_current_def = ::Typedocs::DSL.parse doc_str
+          end
+
+          def method_added(name)
+            super
+            return unless @typedocs_current_def
+
+            current_def = @typedocs_current_def
+            @typedocs_current_def = nil
+
+            ::Typedocs::DSL.decorate self, name, current_def
+          end
         end
-
-        def method_added(name)
-          super
-          return unless @typedocs_current_def
-
-          current_def = @typedocs_current_def
-          @typedocs_current_def = nil
-
-          ::Typedocs::DSL.decorate self, name, current_def
+      else
+        class << klass
+          def tdoc!(doc_str); end
         end
       end
     end

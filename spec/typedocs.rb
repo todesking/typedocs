@@ -61,6 +61,24 @@ describe X do
   end
 end
 
+Typedocs::DSL.do_nothing
+class Unchecked
+  include Typedocs::DSL
+
+  tdoc!"Integer"
+  def not_integer
+    nil
+  end
+end
+
+Typedocs::DSL.do_anything
+
+describe do
+  it do
+    Unchecked.new.not_integer.should == nil
+  end
+end
+
 describe Typedocs::DSL::Parser do
   def spec_for(src)
     Typedocs::DSL.parse(src).retval_spec

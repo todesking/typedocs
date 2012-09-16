@@ -37,10 +37,12 @@ Some of features is not implemented.
     X.square '100'
     # Typedocs::TypeMissmatch: Argument x is not Numeric('100')
 
+    Typedocs::DSL.do_nothing
+    class X
+      include Typedocs::DSL
 
-    Typedocs.check_nothing
-    X.square '100'
-    # TypeError: can't convert String into Integer
+      tdoc!"This text is ignored when Typedocs disabled"
+    end
 
 ## Contributing
 
