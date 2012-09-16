@@ -61,8 +61,8 @@ Some of features is not implemented.
       foo() # but block needed
       foo(*args) # many valid patterns
     Basic validations:
-      name:Type style
-      Validate name:Type style when name should refer argument name
+      name:spec style
+      Validate name:spec style when name should refer argument name
       Types
         Hash
       Values

@@ -121,9 +121,15 @@ module Typedocs
           match /\]/ || (raise error_message :array_end)
           ret << Validator::ArrayAsStruct.new(specs)
         elsif match /{/
-          skip_spaces
+          entries = []
+          begin
+            skip_spaces
+            break if check /}/
+            entries << read_hash_entry!
+            skip_spaces
+          end while match /,/
           match /}/ || (raise error_message :hash_end)
-          ret << Validator::Hash.new([])
+          ret << Validator::Hash.new(entries)
         elsif match /nil/
           ret << Validator::Nil.instance
         else
@@ -148,6 +154,31 @@ module Typedocs
         return Validator::Or.new(ret)
 
         raise "Should not reach here: #{current_source_info}"
+      end
+
+      def read_hash_entry!
+        key = read_hash_key!
+        skip_spaces
+        match /:/ || (raise error_message :hash_colon)
+        skip_spaces
+        spec = read_arg_spec!
+
+        [key, spec]
+      end
+
+      def read_hash_key!
+        if match /[a-zA-Z]\w*[?!]?/
+          matched.to_sym
+        elsif match /['"]/
+          terminator = matched
+          if match /([^\\#{terminator}]|\\.)*#{terminator}/
+            matched[0..-2]
+          else
+            raise error_message :hash_key_string
+          end
+        else
+          raise error_message :hash_key
+        end
       end
 
       def read_allow!
@@ -277,11 +308,9 @@ module Typedocs
       end
 
       def valid?(obj)
-        [
-          obj.is_a?(::Array),
-          @specs.size == obj.size,
-          @specs.zip(obj).all?{|spec,elm| spec.valid?(elm)},
-        ].all?
+        obj.is_a?(::Array) &&
+        @specs.size == obj.size &&
+        @specs.zip(obj).all?{|spec,elm| spec.valid?(elm)}
       end
     end
 
@@ -290,22 +319,19 @@ module Typedocs
         @spec = spec
       end
       def valid?(obj)
-        [
-          obj.is_a?(::Array),
-          obj.all?{|elm| @spec.valid?(elm)},
-        ].all?
+          obj.is_a?(::Array) && obj.all?{|elm| @spec.valid?(elm)}
       end
     end
 
     class Hash < Validator
       # [key, spec]... ->
-      def initialize(args)
+      def initialize(entries)
+        @entries = entries
       end
       def valid?(obj)
-        [
-          obj.is_a?(::Hash),
-          obj.empty?,
-        ].all?
+        obj.is_a?(::Hash) &&
+        @entries.size == obj.size &&
+        @entries.all? {|key, spec| obj.has_key?(key) && spec.valid?(obj[key]) }
       end
     end
 
