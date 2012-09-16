@@ -74,11 +74,11 @@ module Typedocs
       #   type        := type_name | any | dont_care | nil
       #   dont_care   := '--'
       #   value_specs := expression (',' expression)*
-      #   composite   := free_array | const_array | hash
-      #   free_array  := spec...
-      #   const_array := [spec(, spec)*]
+      #   composite   := array | struct_array | hash
+      #   array  := spec...
+      #   struct_array := [spec(, spec)*]
       #   hash        := {key_pattern: spec(, key_pattern: spec)*}
-      #   key_pattern := lit_symbol | lit_string | number
+      #   key_pattern := '?'? ( lit_symbol | lit_string | number )
       def parse
         return read_method_spec
       end
@@ -118,8 +118,12 @@ module Typedocs
             skip_spaces
           end while match /,/
           skip_spaces
-          match /\]/ || (raise error_message :right_bracket)
+          match /\]/ || (raise error_message :array_end)
           ret << Validator::ArrayAsStruct.new(specs)
+        elsif match /{/
+          skip_spaces
+          match /}/ || (raise error_message :hash_end)
+          ret << Validator::Hash.new([])
         elsif match /nil/
           ret << Validator::Nil.instance
         else
@@ -289,6 +293,18 @@ module Typedocs
         [
           obj.is_a?(::Array),
           obj.all?{|elm| @spec.valid?(elm)},
+        ].all?
+      end
+    end
+
+    class Hash < Validator
+      # [key, spec]... ->
+      def initialize(args)
+      end
+      def valid?(obj)
+        [
+          obj.is_a?(::Hash),
+          obj.empty?,
         ].all?
       end
     end

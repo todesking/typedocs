@@ -135,6 +135,13 @@ describe Typedocs::DSL::Parser do
       it { should be_valid([]) }
       it { should_not be_valid(['a']) }
     end
+    describe 'Hash' do
+      describe 'empty' do
+        subject { spec_for '{}' }
+        it { should be_valid({}) }
+        it { should_not be_valid({1 => 2}) }
+      end
+    end
   end
 end
 
