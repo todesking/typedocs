@@ -73,6 +73,7 @@ Some of features is not implemented.
     Informative error message
     Method override
     Disable checking
+    Self hosting
 
 
 * * * * *
