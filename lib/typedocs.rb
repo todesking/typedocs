@@ -81,13 +81,14 @@ module Typedocs
       end
 
       def read_arg_spec!
+        ret = []
         if match /[A-Z]\w+\s*/ 
           klass = const_get_from ::Kernel, matched.strip
-          return Validator::Type.for(klass)
+          ret << Validator::Type.for(klass)
         elsif match /\*\s*/
-          return Validator::Any.instance
+          ret << Validator::Any.instance
         elsif check /->/
-          return Validator::DontCare.instance
+          ret << Validator::DontCare.instance
         elsif match /\[/
           specs = []
           begin
@@ -98,10 +99,24 @@ module Typedocs
           end while match /,/
           skip_spaces
           match /\]/ || (raise error_message :right_bracket)
-          return Validator::ArrayAsStruct.new(specs)
+          ret << Validator::ArrayAsStruct.new(specs)
         else
           raise error_message :arg_spec
         end
+        raise "Assertion error: #{current_source_info}" if ret.empty?
+
+        # TODO: Could be optimize(for multiple or)
+        skip_spaces
+        while match /\|/
+          skip_spaces
+          ret << read_arg_spec!
+          skip_spaces
+        end
+
+        return ret.first if ret.size == 1
+
+        return Validator::Or.new(ret)
+
         raise "Should not reach here: #{current_source_info}"
       end
 
@@ -228,6 +243,15 @@ module Typedocs
           @specs.size == obj.size,
           @specs.zip(obj).all?{|spec,elm| spec.valid?(elm)},
         ].all?
+      end
+    end
+
+    class Or < Validator
+      def initialize(children)
+        @children = children
+      end
+      def valid?(obj)
+        @children.any?{|spec| spec.valid? obj}
       end
     end
   end

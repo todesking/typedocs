@@ -22,6 +22,11 @@ class X
   def return_empty_array
     []
   end
+
+  tdoc!"* -> String | Integer"
+  def return_int_or_string(is_str)
+    is_str ? 'string' : 100
+  end
 end
 
 describe X do
@@ -40,6 +45,11 @@ describe X do
 
   it do
     X.new.return_empty_array.should == []
+  end
+
+  it do
+    X.new.return_int_or_string(true).should == 'string'
+    X.new.return_int_or_string(false).should == 100
   end
 end
 
@@ -75,6 +85,13 @@ describe Typedocs::DSL::Parser do
         it { should be_valid([]) }
         it { should_not be_valid([nil]) }
       end
+    end
+    describe 'OR' do
+      subject { spec_for 'String | Symbol | Integer' }
+        it { should be_valid('s') }
+        it { should be_valid(:aaa) }
+        it { should be_valid(100) }
+        it { should_not be_valid(1.0) }
     end
   end
 end
