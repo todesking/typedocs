@@ -83,7 +83,7 @@ describe Typedocs::Parser do
   def spec_for(src)
     Typedocs::DSL.parse(src).retval_spec
   end
-  describe 'parsing arg/retval spec' do
+  describe 'parsing single validation' do
     describe 'is-a' do
       subject { spec_for 'Numeric' }
       it { should be_valid(1) }
@@ -148,11 +148,51 @@ describe Typedocs::Parser do
         it { should_not be_valid({symbol_key: 10}) }
         it { should_not be_valid(nil) }
       end
-      # key could symbol, string
       # optional key
-      # key duplicate
+      # error if key duplicated
     end
     # name:spec style
+  end
+end
+
+describe Typedocs::MethodSpec do
+  def parse(src)
+    Typedocs::Parser.new(src).parse
+  end
+  def ok(*args,&block)
+    subject.call_with_validate(block, *args)
+    # should not raise any exceptions
+  end
+  def ng_arg(*args, &block)
+    expect { ok(*args, &block) }.to raise_error Typedocs::ArgumentError
+  end
+  def ng_ret(*args, &block)
+    expect { ok(*args, &block) }.to raise_error Typedocs::RetValError
+  end
+  describe 'validation' do
+    describe 'retval is Integer' do
+      subject { parse('Integer') }
+      it { ok { 1 } }
+      it { ng_ret { nil } }
+      it { ng_ret { '1' } }
+    end
+    describe 'retval is Integer or nil' do
+      subject { parse 'Integer|nil' }
+      it { ok { 1 } }
+      it { ok { nil } }
+      it { ng_ret { '1' } }
+    end
+    describe 'Integer -> Integer' do
+      subject { parse 'Integer -> Integer' }
+      it { ok(1) {|i| i} }
+      it { ng_arg(nil) { nil } }
+      it { ng_ret(1) { nil } }
+    end
+    describe 'Integer -> --(dont care)' do
+      subject { parse 'Integer -> --' }
+      it { ok(1) {1} }
+      it { ng_arg(nil) {1} }
+    end
   end
 end
 
