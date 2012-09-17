@@ -82,9 +82,6 @@ end
       tdoc!"Integer -> Integer"
       def default_value i=10
 
-      tdoc!"* -> Symbol -> * || Symbol -> * || * -> & -> * || * -> *"
-      def my_reduce *args
-
     Basic validations:
       name:spec style
       Validate name:spec style when name should refer argument name
@@ -94,6 +91,8 @@ end
         String(not .empty?)
       Named specs
         @positive_int
+      Duck typing(callable etc)
+    foo 1,2,skip_validation('3')
     Ignore checking for specific argument
     Exception spec
     Class methods
