@@ -26,15 +26,15 @@ Some of features is not implemented.
       include Typedocs::DSL
 
       tdoc!"Numeric -> Numeric"
-      def self.square x
+      def square x
         x * x
       end
     end
 
-    X.square 10
+    X.new.square 10
     # => 100
 
-    X.square '100'
+    X.new.square '100'
     # Typedocs::TypeMissmatch: Argument x is not Numeric('100')
 
     Typedocs::DSL.do_nothing
@@ -55,25 +55,38 @@ Some of features is not implemented.
 ## TODO
 
     Method spec definitions:
-      foo(arg1, arrg2 = default_value)
-      foo(arg1, *rest)
-      foo(arg1, &block)
-      foo() # but block needed
-      foo(*args) # many valid patterns
+      tdoc!"Integer -> & -> Integer"
+      def default_value_with_block i=10, &block
+
+      tdoc!"Integer -> Integer"
+      def default_value i=10
+
+      tdoc!"* -> Symbol -> * || Symbol -> * || * -> & -> * || * -> *"
+      def my_reduce *args
+
+      tdoc!"Integer -> & ->"
+      def need_block i, &block
+
+      tdoc!"Integer -> &? ->"
+      def optional_block i, block
+
+      tdoc!"Array -> & -> Array || Array -> Enumerable"
+      def my_map array, &block
+
     Basic validations:
       name:spec style
       Validate name:spec style when name should refer argument name
-      Types
-        Hash
+      Block type specification
       Values
         Integer(>0)
         String(not .empty?)
       Named specs
         @positive_int
+    Class methods
     Informative error message
     Method override
-    Disable checking
     Self hosting
+    Re-define existing method's spec
 
 
 * * * * *
