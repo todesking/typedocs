@@ -2,6 +2,10 @@
 
 The goal of the project is to provide user-friendly type annotations for Ruby.
 
+## Platform
+
+Ruby 1.9
+
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -99,6 +103,7 @@ end
     Class methods
     Informative error message
     Method override
+    Singleton method
     Self hosting
     Re-define existing method's spec
     Auto spec inference(from argument name)
