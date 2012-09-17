@@ -4,8 +4,7 @@ require File.expand_path('../lib/typedocs/version', __FILE__)
 Gem::Specification.new do |gem|
   gem.authors       = ["todesking"]
   gem.email         = ["discommunicative@gmail.com"]
-  gem.description   = %q{TODO: Write a gem description}
-  gem.summary       = %q{TODO: Write a gem summary}
+  gem.summary       = %q{Human readable type annotations}
   gem.homepage      = ""
 
   gem.files         = `git ls-files`.split($\)
