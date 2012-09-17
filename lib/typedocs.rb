@@ -275,8 +275,8 @@ module Typedocs
     end
 
     def validate_block(block)
-      raise Typedocs::ArgumentError, "Block not given" if block_spec && !block
-      raise Typedocs::ArgumentError, "Cant accept block" if !block_spec && block
+      raise Typedocs::BlockError, "Block not given" if block_spec && !block
+      raise Typedocs::BlockError, "Cant accept block" if !block_spec && block
       if block_spec
         block_spec.validate_block! block
       end

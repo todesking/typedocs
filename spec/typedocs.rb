@@ -111,6 +111,9 @@ describe Typedocs::MethodSpec do
   def ng_ret(*args, &block)
     expect { ok(*args, &block) }.to raise_error Typedocs::RetValError
   end
+  def ng_block(*args, &block)
+    expect { ok(*args, &block) }.to raise_error Typedocs::BlockError
+  end
   describe 'validation' do
     describe 'retval is Integer' do
       subject { parse('Integer') }
@@ -138,7 +141,7 @@ describe Typedocs::MethodSpec do
     describe 'Integer -> & -> String' do
       subject { parse 'Integer -> & -> String' }
       it { ok(1,lambda{|i|i.to_s}) {|&block| block.call 1} }
-      it { ng_arg(1) {|&block| block.call 1} }
+      it { ng_block(1) {|&block| block.call 1} }
     end
   end
 end
