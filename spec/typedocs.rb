@@ -148,6 +148,11 @@ describe Typedocs::MethodSpec do
       it { ok(1,lambda{|i|i.to_s}) {|&block| block.call 'a'} }
       it { ok(1) {|&block| 'a'} }
     end
+    describe 'Integer -> Integer || String -> String' do
+      subject { parse 'Integer -> Integer || String -> String' }
+      it { ok(1) {|i| 2} }
+      it { ok('a') {|s| 'x'} }
+    end
   end
 end
 

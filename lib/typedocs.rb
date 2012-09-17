@@ -81,15 +81,33 @@ module Typedocs
     #   hash        := {key_pattern: spec(, key_pattern: spec)*}
     #   key_pattern := '?'? ( lit_symbol | lit_string | number )
     def parse
-      return read_method_spec
+      return read_method_spec!
     end
 
     private
-    def read_method_spec
+    def read_method_spec!
+      specs = []
+      begin
+        skip_spaces
+        specs << read_method_spec_single!
+        skip_spaces
+      end while match /\|\|/
+
+      skip_spaces
+      raise error_message :eos unless eos?
+
+      if specs.size == 1
+        return specs.first
+      else
+        MethodSpec::Any.new(specs)
+      end
+    end
+
+    def read_method_spec_single!
       arg_specs = []
       block_spec = nil
 
-      until eos?
+      until eos? or check /\|\|/
         skip_spaces
 
         block_spec = read_block_spec
@@ -107,23 +125,47 @@ module Typedocs
         read_allow!
       end
 
-      skip_spaces
-      raise error_message :eos unless eos?
-
       arg_specs = [Validator::DontCare.instance] if arg_specs.empty?
 
-      return MethodSpec.new arg_specs[0..-2], block_spec, arg_specs[-1]
+      return MethodSpec::Single.new arg_specs[0..-2], block_spec, arg_specs[-1]
     end
 
     def read_arg_spec!
-      ret = []
+      spec = read_simple_arg_spec!
+
+      skip_spaces
+
+      if check /\|\|/
+        return spec
+      end
+
+      if match /\.\.\./
+        spec = Validator::Array.new(spec)
+      end
+
+      skip_spaces
+      return spec unless check /\|/
+
+      ret = [spec]
+      # TODO: Could be optimize(for more than two elements)
+      while match /\|/
+        skip_spaces
+        ret << read_arg_spec!
+        skip_spaces
+      end
+      return Validator::Or.new(ret)
+
+      raise "Should not reach here: #{current_source_info}"
+    end
+
+    def read_simple_arg_spec!
       if match /[A-Z]\w+/ 
         klass = const_get_from ::Kernel, matched.strip
-        ret << Validator::Type.for(klass)
+        Validator::Type.for(klass)
       elsif match /\*/
-        ret << Validator::Any.instance
+        Validator::Any.instance
       elsif check /->/ or match /--/
-        ret << Validator::DontCare.instance
+        Validator::DontCare.instance
       elsif match /\[/
         specs = []
         begin
@@ -134,7 +176,7 @@ module Typedocs
         end while match /,/
         skip_spaces
         match /\]/ || (raise error_message :array_end)
-        ret << Validator::ArrayAsStruct.new(specs)
+        Validator::ArrayAsStruct.new(specs)
       elsif match /{/
         entries = []
         begin
@@ -144,31 +186,12 @@ module Typedocs
           skip_spaces
         end while match /,/
         match /}/ || (raise error_message :hash_end)
-        ret << Validator::Hash.new(entries)
+        Validator::Hash.new(entries)
       elsif match /nil/
-        ret << Validator::Nil.instance
+        Validator::Nil.instance
       else
         raise error_message :arg_spec
       end
-      raise "Assertion error: #{current_source_info}" if ret.empty?
-
-      if match /\.\.\./
-        ret = [Validator::Array.new(ret.first)]
-      end
-
-      # TODO: Could be optimize(for multiple or)
-      skip_spaces
-      while match /\|/
-        skip_spaces
-        ret << read_arg_spec!
-        skip_spaces
-      end
-
-      return ret.first if ret.size == 1
-
-      return Validator::Or.new(ret)
-
-      raise "Should not reach here: #{current_source_info}"
     end
 
     def read_block_spec
@@ -248,46 +271,79 @@ module Typedocs
     end
   end
 
-  class MethodSpec
-    # [Validator] -> Validator ->
-    def initialize(args, block, ret)
-      @argument_specs = args
-      @block_spec = block
-      @retval_spec = ret
-    end
+  module MethodSpec
+    class Any
+      # [Single] ->
+      def initialize(specs)
+        @specs = specs
+      end
 
-    attr_reader :argument_specs
-    attr_reader :block_spec
-    attr_reader :retval_spec
+      def call_with_validate(method, *args, &block)
+        spec = nil
+        @specs.each do|s|
+          begin
+            s.validate_caller(args, block)
+            spec = s
+            break
+          rescue Typedocs::ArgumentError, Typedocs::BlockError
+          end
+        end
 
-    def argument_size
-      argument_specs.size
-    end
+        unless spec
+          raise Typedocs::ArgumentError, "Arguments not match any rule"
+        end
 
-    def call_with_validate method, *args, &block
-      validate_args args
-      validate_block block
-      ret = method.call *args, &block
-      validate_retval ret
-      ret
-    end
-
-    def validate_args(args)
-      raise Typedocs::ArgumentError, "Argument size missmatch: expected #{argument_size} but #{args.size}" unless argument_size == args.size
-      argument_specs.zip(args).each do|spec, arg|
-        spec.validate_argument! arg
+        # TODO this process do same validate twice. fix it for performance.
+        spec.call_with_validate(method, *args, &block)
       end
     end
 
-    def validate_block(block)
-      raise Typedocs::BlockError, "Cant accept block" if !block_spec && block
-      if block_spec
-        block_spec.validate_block! block
+    class Single
+      # [Validator] -> Validator -> Validator ->
+      def initialize(args, block, ret)
+        @argument_specs = args
+        @block_spec = block
+        @retval_spec = ret
       end
-    end
 
-    def validate_retval(ret)
-      retval_spec.validate_retval! ret
+      attr_reader :argument_specs
+      attr_reader :block_spec
+      attr_reader :retval_spec
+
+      def argument_size
+        argument_specs.size
+      end
+
+      def call_with_validate(method, *args, &block)
+        validate_args args
+        validate_block block
+        ret = method.call *args, &block
+        validate_retval ret
+        ret
+      end
+
+      def validate_caller(args, block)
+        validate_args args
+        validate_block block
+      end
+
+      def validate_args(args)
+        raise Typedocs::ArgumentError, "Argument size missmatch: expected #{argument_size} but #{args.size}" unless argument_size == args.size
+        argument_specs.zip(args).each do|spec, arg|
+          spec.validate_argument! arg
+        end
+      end
+
+      def validate_block(block)
+        raise Typedocs::BlockError, "Cant accept block" if !block_spec && block
+        if block_spec
+          block_spec.validate_block! block
+        end
+      end
+
+      def validate_retval(ret)
+        retval_spec.validate_retval! ret
+      end
     end
   end
 
