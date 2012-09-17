@@ -260,22 +260,30 @@ module Typedocs
     end
 
     def call_with_validate method, *args, &block
+      validate_args args
+      validate_block block
+      ret = method.call *args, &block
+      validate_retval ret
+      ret
+    end
+
+    def validate_args(args)
       raise Typedocs::ArgumentError, "Argument size missmatch: expected #{argument_size} but #{args.size}" unless argument_size == args.size
       argument_specs.zip(args).each do|spec, arg|
         spec.validate_argument! arg
       end
+    end
 
+    def validate_block(block)
       raise Typedocs::ArgumentError, "Block not given" if block_spec && !block
       raise Typedocs::ArgumentError, "Cant accept block" if !block_spec && block
       if block_spec
         block_spec.validate_block! block
       end
+    end
 
-      ret = method.call *args, &block
-
+    def validate_retval(ret)
       retval_spec.validate_retval! ret
-
-      ret
     end
   end
 

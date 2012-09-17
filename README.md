@@ -95,6 +95,7 @@ end
       Named specs
         @positive_int
     Ignore checking for specific argument
+    Exception spec
     Class methods
     Informative error message
     Method override
