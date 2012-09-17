@@ -83,12 +83,6 @@ end
       tdoc!"* -> Symbol -> * || Symbol -> * || * -> & -> * || * -> *"
       def my_reduce *args
 
-      tdoc!"Integer -> &? ->"
-      def optional_block i, block
-
-      tdoc!"Array -> & -> Array || Array -> Enumerable"
-      def my_map array, &block
-
     Basic validations:
       name:spec style
       Validate name:spec style when name should refer argument name
