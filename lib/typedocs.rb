@@ -172,7 +172,12 @@ module Typedocs
     end
 
     def read_block_spec
-      if match /&/
+      if match /&\?/
+        Validator::Or.new([
+          Validator::Type.for(Proc),
+          Validator::Nil.instance,
+        ])
+      elsif match /&/
         Validator::Type.for(Proc)
       else
         nil
@@ -275,7 +280,6 @@ module Typedocs
     end
 
     def validate_block(block)
-      raise Typedocs::BlockError, "Block not given" if block_spec && !block
       raise Typedocs::BlockError, "Cant accept block" if !block_spec && block
       if block_spec
         block_spec.validate_block! block

@@ -55,7 +55,7 @@ end
     method_spec     = (arg_spec '->')* (block_spec '->')? retval_spec
     retval_spec     = arg_spec
     arg_spec        = type | or | array | array_as_struct | any | hash | dont_care
-    block_spec      = '&'
+    block_spec      = '&' | '&?'
     type            = Class or Module name
     or              = arg_spec '|' arg_spec
     array           = arg_spec...

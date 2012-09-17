@@ -143,6 +143,11 @@ describe Typedocs::MethodSpec do
       it { ok(1,lambda{|i|i.to_s}) {|&block| block.call 1} }
       it { ng_block(1) {|&block| block.call 1} }
     end
+    describe 'Integer -> &? -> String' do
+      subject { parse 'Integer -> &? -> String' }
+      it { ok(1,lambda{|i|i.to_s}) {|&block| block.call 'a'} }
+      it { ok(1) {|&block| 'a'} }
+    end
   end
 end
 
