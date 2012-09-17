@@ -56,8 +56,8 @@ module Typedocs
 
       klass.instance_eval do
         original_method = instance_method(name)
-        define_method name do|*args|
-          tdoc_def.call_with_validate original_method.bind(self), *args
+        define_method name do|*args,&block|
+          tdoc_def.call_with_validate original_method.bind(self), *args, &block
         end
       end
     end
@@ -87,8 +87,19 @@ module Typedocs
     private
     def read_method_spec
       arg_specs = []
+      block_spec = nil
+
       until eos?
         skip_spaces
+
+        block_spec = read_block_spec
+        if block_spec
+          skip_spaces
+          read_allow!
+          skip_spaces
+          arg_specs << read_arg_spec!
+          break
+        end
 
         arg_specs << read_arg_spec!
 
@@ -96,9 +107,12 @@ module Typedocs
         read_allow!
       end
 
+      skip_spaces
+      raise error_message :eos unless eos?
+
       arg_specs = [Validator::DontCare.instance] if arg_specs.empty?
 
-      return MethodSpec.new arg_specs[0..-2], arg_specs[-1]
+      return MethodSpec.new arg_specs[0..-2], block_spec, arg_specs[-1]
     end
 
     def read_arg_spec!
@@ -155,6 +169,14 @@ module Typedocs
       return Validator::Or.new(ret)
 
       raise "Should not reach here: #{current_source_info}"
+    end
+
+    def read_block_spec
+      if match /&/
+        Validator::Type.for(Proc)
+      else
+        nil
+      end
     end
 
     def read_hash_entry!
@@ -223,25 +245,33 @@ module Typedocs
 
   class MethodSpec
     # [Validator] -> Validator ->
-    def initialize(args, ret)
+    def initialize(args, block, ret)
       @argument_specs = args
+      @block_spec = block
       @retval_spec = ret
     end
 
     attr_reader :argument_specs
+    attr_reader :block_spec
     attr_reader :retval_spec
 
     def argument_size
       argument_specs.size
     end
 
-    def call_with_validate method, *args
+    def call_with_validate method, *args, &block
       raise Typedocs::ArgumentError, "Argument size missmatch: expected #{argument_size} but #{args.size}" unless argument_size == args.size
       argument_specs.zip(args).each do|spec, arg|
         spec.validate_argument! arg
       end
 
-      ret = method.call *args
+      raise Typedocs::ArgumentError, "Block not given" if block_spec && !block
+      raise Typedocs::ArgumentError, "Cant accept block" if !block_spec && block
+      if block_spec
+        block_spec.validate_block! block
+      end
+
+      ret = method.call *args, &block
 
       retval_spec.validate_retval! ret
 
@@ -257,6 +287,11 @@ module Typedocs
     def validate_retval!(obj)
       raise Typedocs::RetValError, "Bad value: #{obj.inspect}" unless valid? obj
     end
+
+    def validate_block!(obj)
+      raise Typedocs::BlockError, "Bad block: #{obj.inspect}" unless valid? obj
+    end
+
     def valid?(obj)
       raise "Not implemented"
     end
@@ -350,4 +385,5 @@ module Typedocs
 
   class ArgumentError < ::ArgumentError; end
   class RetValError < ::StandardError; end
+  class BlockError < ::StandardError; end
 end

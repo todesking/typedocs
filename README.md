@@ -51,6 +51,7 @@ end
     method_spec     = (arg_spec '->')* (block_spec '->')? retval_spec
     retval_spec     = arg_spec
     arg_spec        = type | or | array | array_as_struct | any | hash | dont_care
+    block_spec      = '&'
     type            = Class or Module name
     or              = arg_spec '|' arg_spec
     array           = arg_spec...
@@ -72,17 +73,11 @@ end
 ## TODO
 
     Method spec definitions:
-      tdoc!"Integer -> & -> Integer"
-      def default_value_with_block i=10, &block
-
       tdoc!"Integer -> Integer"
       def default_value i=10
 
       tdoc!"* -> Symbol -> * || Symbol -> * || * -> & -> * || * -> *"
       def my_reduce *args
-
-      tdoc!"Integer -> & ->"
-      def need_block i, &block
 
       tdoc!"Integer -> &? ->"
       def optional_block i, block

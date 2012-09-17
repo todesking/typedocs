@@ -80,10 +80,13 @@ describe do
 end
 
 describe Typedocs::Parser do
-  def spec_for(src)
-    Typedocs::DSL.parse(src).retval_spec
+  def parse(src)
+    Typedocs::Parser.new(src).parse
   end
   describe 'parsing single validation' do
+    def spec_for(src)
+      parse(src).retval_spec
+    end
     describe 'is-a' do
       subject { spec_for 'Numeric' }
       it { should be_valid(1) }
@@ -153,6 +156,19 @@ describe Typedocs::Parser do
     end
     # name:spec style
   end
+  describe 'parsing method specification with block' do
+    describe 'Integer -> & -> String' do
+      subject { parse 'Integer -> & -> String' }
+      its(:block_spec) { should_not be_nil }
+      it { subject.block_spec.should_not be_valid(nil) }
+      it { subject.block_spec.should be_valid(lambda{}) }
+    end
+    describe 'Invalid syntax' do
+      it do
+        expect { parse 'Integer -> & -> Integer -> String' }.to raise_error
+      end
+    end
+  end
 end
 
 describe Typedocs::MethodSpec do
@@ -160,7 +176,12 @@ describe Typedocs::MethodSpec do
     Typedocs::Parser.new(src).parse
   end
   def ok(*args,&block)
-    subject.call_with_validate(block, *args)
+    case args.last
+    when Proc
+      subject.call_with_validate(block, *args[0..-2], &args.last)
+    else
+      subject.call_with_validate(block, *args)
+    end
     # should not raise any exceptions
   end
   def ng_arg(*args, &block)
@@ -192,6 +213,11 @@ describe Typedocs::MethodSpec do
       subject { parse 'Integer -> --' }
       it { ok(1) {1} }
       it { ng_arg(nil) {1} }
+    end
+    describe 'Integer -> & -> String' do
+      subject { parse 'Integer -> & -> String' }
+      it { ok(1,lambda{|i|i.to_s}) {|&block| block.call 1} }
+      it { ng_arg(1) {|&block| block.call 1} }
     end
   end
 end
