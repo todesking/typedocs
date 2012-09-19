@@ -95,5 +95,20 @@ describe 'Usage examples' do
       end
     end
   end
+  class Initialize
+    include Typedocs::DSL
+
+    tdoc!"Integer ->"
+    def initialize(n)
+    end
+  end
+  describe Initialize do
+    it do
+      Initialize.new(1)
+    end
+    it do
+      expect { Initialize.new(nil) }.to raise_error ArgumentError
+    end
+  end
 end
 

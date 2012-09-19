@@ -107,23 +107,26 @@ module Typedocs
       arg_specs = []
       block_spec = nil
 
-      until eos? or check /\|\|/
+      arg_specs << read_arg_spec!
+      skip_spaces
+      while read_arrow
         skip_spaces
 
         block_spec = read_block_spec
         if block_spec
           skip_spaces
-          read_allow!
+          read_arrow!
           skip_spaces
           arg_specs << read_arg_spec!
+          skip_spaces
           break
         end
 
         arg_specs << read_arg_spec!
 
         skip_spaces
-        read_allow!
       end
+      skip_spaces
 
       arg_specs = [Validator::DontCare.instance] if arg_specs.empty?
 
@@ -159,12 +162,12 @@ module Typedocs
     end
 
     def read_simple_arg_spec!
-      if match /[A-Z]\w+/ 
+      if match /[A-Z]\w+/
         klass = const_get_from ::Kernel, matched.strip
         Validator::Type.for(klass)
       elsif match /\*/
         Validator::Any.instance
-      elsif check /->/ or match /--/
+      elsif check /->/ or match /--/ or check /\|\|/ or eos?
         Validator::DontCare.instance
       elsif match /\[/
         specs = []
@@ -232,8 +235,12 @@ module Typedocs
       end
     end
 
-    def read_allow!
-      match /->/ || (raise error_message :allow)
+    def read_arrow
+      match /->/
+    end
+
+    def read_arrow!
+      read_arrow || (raise error_message :arrow)
     end
 
     def error_message expected
@@ -241,7 +248,7 @@ module Typedocs
     end
 
     def current_source_info
-      "src = #{@src.string.inspect}, error at: #{@src.string[@src.pos..(@src.pos+30)]}"
+      "src = #{@src.string.inspect}, error at: \"#{@src.string[@src.pos..(@src.pos+30)]}\""
     end
 
     def const_get_from root, name
@@ -351,7 +358,7 @@ module Typedocs
     def validate_argument!(obj)
       raise Typedocs::ArgumentError, "Bad value: #{obj.inspect}" unless valid? obj
     end
-    
+
     def validate_retval!(obj)
       raise Typedocs::RetValError, "Bad value: #{obj.inspect}" unless valid? obj
     end
