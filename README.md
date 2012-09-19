@@ -79,8 +79,13 @@ end
 ## TODO
 
     Method spec definitions:
-      tdoc!"Integer -> Integer"
+      change 'any' symbol(*) to other something.
+
+      tdoc!"Integer? -> Integer"
       def default_value i=10
+
+      tdoc!"Integer -> String -> *Integer"
+      def rest_args(a,b,*rest)
 
     Basic validations:
       name:spec style
