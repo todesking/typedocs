@@ -13,6 +13,16 @@ describe Typedocs::Parser do
       it { should be_valid(1) }
       it { should_not be_valid('string') }
     end
+    describe 'is-a(absolute name)' do
+      subject { spec_for '::Numeric' }
+      it { should be_valid(1) }
+      it { should_not be_valid('string') }
+    end
+    describe 'is-a(nested name)' do
+      subject { spec_for '::Kernel::Numeric' }
+      it { should be_valid(1) }
+      it { should_not be_valid('string') }
+    end
     describe 'dont care(implicit)' do
       subject { spec_for '' }
       it { should be_valid(1) }

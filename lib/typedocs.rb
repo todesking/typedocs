@@ -173,7 +173,7 @@ module Typedocs
     end
 
     def read_simple_arg_spec!
-      if match /[A-Z]\w+/
+      if match /(::)?[A-Z]\w+(::[A-Z]\w+)*/
         klass = const_get_from ::Kernel, matched.strip
         Validator::Type.for(klass)
       elsif match /\*/
@@ -263,9 +263,11 @@ module Typedocs
     end
 
     def const_get_from root, name
-      name.split(/::/).inject(root) do|root, name|
+      name.gsub(/^::/,'').split(/::/).inject(root) do|root, name|
         root.const_get(name.to_sym)
       end
+    rescue NameError => e
+      raise NameError, "NameError: #{name.inspect}"
     end
 
     def skip_spaces

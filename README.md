@@ -91,6 +91,8 @@ end
       name:spec style
       Validate name:spec style when name should refer argument name
       Block type specification
+      Hash{String -> Integer}
+      Symbol(:a | :b | :c)
       Values
         Integer(>0)
         String(not .empty?)
