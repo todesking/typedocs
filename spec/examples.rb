@@ -107,7 +107,24 @@ describe 'Usage examples' do
       Initialize.new(1)
     end
     it do
-      expect { Initialize.new(nil) }.to raise_error ArgumentError
+      expect { Initialize.new(nil) }.to raise_error Typedocs::ArgumentError
+    end
+  end
+
+  class ClassMethods
+    include Typedocs::DSL
+
+    tdoc!"String->Integer"
+    def self.class_method(s); s.to_i; end
+
+    def untyped_instance_method(arg); arg; end
+  end
+  describe ClassMethods do
+    it do
+      ClassMethods.new.untyped_instance_method(1).should == 1
+    end
+    it do
+      expect { ClassMethods.class_method(1) }.to raise_error Typedocs::ArgumentError
     end
   end
 end

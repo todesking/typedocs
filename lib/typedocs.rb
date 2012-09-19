@@ -39,6 +39,17 @@ module Typedocs
 
             ::Typedocs::DSL.decorate self, name, current_def
           end
+
+          def singleton_method_added(name)
+            super
+            return unless @typedocs_current_def
+
+            current_def = @typedocs_current_def
+            @typedocs_current_def = nil
+
+            singleton_class = class << self; self; end
+            ::Typedocs::DSL.decorate singleton_class, name, current_def
+          end
         end
       else
         class << klass

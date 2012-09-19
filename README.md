@@ -98,12 +98,11 @@ end
         @positive_int
       Duck typing(callable etc)
     foo 1,2,skip_validation('3')
-    Ignore checking for specific argument
+    Skip checking for specific argument
     Exception spec
     Class methods
     Informative error message
     Method override
-    Singleton method
     Self hosting
     Re-define existing method's spec
     Auto spec inference(from argument name)
