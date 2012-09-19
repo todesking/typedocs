@@ -174,8 +174,7 @@ module Typedocs
 
     def read_simple_arg_spec!
       if match /(::)?[A-Z]\w+(::[A-Z]\w+)*/
-        klass = const_get_from ::Kernel, matched.strip
-        Validator::Type.for(klass)
+        Validator::Type.new(matched.strip)
       elsif match /\*/
         Validator::Any.instance
       elsif check /->/ or match /--/ or check /\|\|/ or eos?
@@ -211,11 +210,11 @@ module Typedocs
     def read_block_spec
       if match /&\?/
         Validator::Or.new([
-          Validator::Type.for(Proc),
+          Validator::Type.new('::Proc'),
           Validator::Nil.instance,
         ])
       elsif match /&/
-        Validator::Type.for(Proc)
+        Validator::Type.new('::Proc')
       else
         nil
       end
@@ -260,14 +259,6 @@ module Typedocs
 
     def current_source_info
       "src = #{@src.string.inspect}, error at: \"#{@src.string[@src.pos..(@src.pos+30)]}\""
-    end
-
-    def const_get_from root, name
-      name.gsub(/^::/,'').split(/::/).inject(root) do|root, name|
-        root.const_get(name.to_sym)
-      end
-    rescue NameError => e
-      raise NameError, "NameError: #{name.inspect}"
     end
 
     def skip_spaces
@@ -403,16 +394,25 @@ module Typedocs
     end
 
     class Type < Validator
-      def self.for(klass)
-        new(klass)
+      def initialize(name)
+        @name = name
       end
 
-      def initialize(klass)
-        @klass = klass
+      def target_klass
+        @target_klass ||= const_get_from Kernel, @name
       end
 
       def valid?(obj)
-        obj.is_a? @klass
+        obj.is_a? target_klass
+      end
+
+      private
+      def const_get_from root, name
+        name.gsub(/^::/,'').split(/::/).inject(root) do|root, name|
+          root.const_get(name.to_sym)
+        end
+      rescue NameError => e
+        raise NameError, "NameError: #{name.inspect}"
       end
     end
 
