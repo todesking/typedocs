@@ -361,15 +361,15 @@ module Typedocs
 
   class Validator
     def validate_argument!(obj)
-      raise Typedocs::ArgumentError, "Bad value: #{obj.inspect}" unless valid? obj
+      raise Typedocs::ArgumentError, "Expected #{description} but #{obj.inspect}" unless valid? obj
     end
 
     def validate_retval!(obj)
-      raise Typedocs::RetValError, "Bad value: #{obj.inspect}" unless valid? obj
+      raise Typedocs::RetValError, "Expected #{description} but #{obj.inspect}" unless valid? obj
     end
 
     def validate_block!(obj)
-      raise Typedocs::BlockError, "Bad block: #{obj.inspect}" unless valid? obj
+      raise Typedocs::BlockError, "Bad value: #{obj.inspect}" unless valid? obj
     end
 
     def valid?(obj)
@@ -383,6 +383,9 @@ module Typedocs
       def valid?(obj)
         true
       end
+      def description
+        '--(dont care)'
+      end
     end
 
     class Any < Validator
@@ -391,6 +394,9 @@ module Typedocs
       end
       def valid?(obj)
         true
+      end
+      def description
+        'any objects'
       end
     end
 
@@ -406,6 +412,10 @@ module Typedocs
 
       def valid?(obj)
         obj.is_a? target_klass
+      end
+
+      def description
+        "is_a #{target_klass.name}"
       end
 
       private
@@ -433,6 +443,9 @@ module Typedocs
       def valid?(obj)
         obj.nil?
       end
+      def description
+        nil
+      end
     end
 
     class ArrayAsStruct < Validator
@@ -445,6 +458,10 @@ module Typedocs
         @specs.size == obj.size &&
         @specs.zip(obj).all?{|spec,elm| spec.valid?(elm)}
       end
+
+      def description
+        "[#{@specs.map(&:description).join(', ')}]"
+      end
     end
 
     class Array < Validator
@@ -453,6 +470,9 @@ module Typedocs
       end
       def valid?(obj)
           obj.is_a?(::Array) && obj.all?{|elm| @spec.valid?(elm)}
+      end
+      def description
+        "#{@spec.description}..."
       end
     end
 
@@ -466,6 +486,9 @@ module Typedocs
         @entries.size == obj.size &&
         @entries.all? {|key, spec| obj.has_key?(key) && spec.valid?(obj[key]) }
       end
+      def description
+        "{#{@entries.map{|key,value| "#{key.inspect}: #{values.description}"}.join(',')}}"
+      end
     end
 
     class Or < Validator
@@ -474,6 +497,9 @@ module Typedocs
       end
       def valid?(obj)
         @children.any?{|spec| spec.valid? obj}
+      end
+      def description
+        "#{@children.map(&:description).join(' | ')}"
       end
     end
   end
