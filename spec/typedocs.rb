@@ -2,7 +2,7 @@ load File.join(File.dirname(__FILE__), '..', 'lib', 'typedocs.rb')
 
 describe Typedocs::Parser do
   def parse(src)
-    Typedocs::Parser.new(src).parse
+    Typedocs::Parser.new(Kernel, src).parse
   end
   describe 'parsing single validation' do
     def spec_for(src)
@@ -112,7 +112,7 @@ end
 
 describe Typedocs::MethodSpec do
   def parse(src)
-    Typedocs::Parser.new(src).parse
+    Typedocs::Parser.new(Kernel, src).parse
   end
   def ok(*args,&block)
     case args.last
@@ -174,3 +174,20 @@ describe Typedocs::MethodSpec do
   end
 end
 
+describe Typedocs::Validator::Type do
+  module A
+    module B
+      class C
+      end
+    end
+  end
+  it do
+    expect { Typedocs::Validator::Type.new(Kernel, 'C').valid? A::B::C.new }.to raise_error NameError
+  end
+  it do
+    Typedocs::Validator::Type.new(A::B, 'C').should be_valid(A::B::C.new)
+  end
+  it do
+    Typedocs::Validator::Type.new(A::B, '::A::B::C').should be_valid(A::B::C.new)
+  end
+end

@@ -27,7 +27,7 @@ module Typedocs
       if Typedocs::DSL.enabled?
         class << klass
           def tdoc!(doc_str)
-            @typedocs_current_def = ::Typedocs::DSL.parse doc_str
+            @typedocs_current_def = ::Typedocs::DSL.parse self, doc_str
           end
 
           def method_added(name)
@@ -58,8 +58,8 @@ module Typedocs
       end
     end
 
-    def self.parse doc
-      Typedocs::Parser.new(doc).parse
+    def self.parse klass, doc
+      Typedocs::Parser.new(klass, doc).parse
     end
 
     def self.decorate(klass, name, tdoc_def)
@@ -75,7 +75,8 @@ module Typedocs
   end
 
   class Parser
-    def initialize src
+    def initialize klass, src
+      @klass = klass
       @src = StringScanner.new(src)
     end
 
@@ -173,8 +174,8 @@ module Typedocs
     end
 
     def read_simple_arg_spec!
-      if match /(::)?[A-Z]\w+(::[A-Z]\w+)*/
-        Validator::Type.new(matched.strip)
+      if match /(::)?[A-Z]\w*(::[A-Z]\w*)*/
+        Validator::Type.new(@klass, matched.strip)
       elsif match /\*/
         Validator::Any.instance
       elsif check /->/ or match /--/ or check /\|\|/ or eos?
@@ -210,11 +211,11 @@ module Typedocs
     def read_block_spec
       if match /&\?/
         Validator::Or.new([
-          Validator::Type.new('::Proc'),
+          Validator::Type.new(@klass, '::Proc'),
           Validator::Nil.instance,
         ])
       elsif match /&/
-        Validator::Type.new('::Proc')
+        Validator::Type.new(@klass, '::Proc')
       else
         nil
       end
@@ -394,12 +395,13 @@ module Typedocs
     end
 
     class Type < Validator
-      def initialize(name)
+      def initialize(klass, name)
+        @klass = klass
         @name = name
       end
 
       def target_klass
-        @target_klass ||= const_get_from Kernel, @name
+        @target_klass ||= find_const @klass, @name
       end
 
       def valid?(obj)
@@ -407,6 +409,14 @@ module Typedocs
       end
 
       private
+      def find_const(start, name)
+        case name
+        when /^::/
+          const_get_from ::Kernel, name
+        else
+          const_get_from start, name
+        end
+      end
       def const_get_from root, name
         name.gsub(/^::/,'').split(/::/).inject(root) do|root, name|
           root.const_get(name.to_sym)

@@ -127,5 +127,18 @@ describe 'Usage examples' do
       expect { ClassMethods.class_method(1) }.to raise_error Typedocs::ArgumentError
     end
   end
+
+  class RelativeTypeNames
+    include Typedocs::DSL
+    tdoc!"A"
+    def a; A.new; end
+    class A; end
+  end
+  describe RelativeTypeNames do
+    it do
+      RelativeTypeNames.new.a.should be_is_a(RelativeTypeNames::A)
+    end
+  end
+
 end
 
