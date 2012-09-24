@@ -420,14 +420,47 @@ module Typedocs
 
       private
       def find_const(start, name)
+        raise ::ArgumentError, 'name' if name.empty?
+        raise ::ArgumentError, 'start' unless start
         case name
         when /^::/
-          const_get_from ::Kernel, name
+          const_get_from! ::Object, name
         else
-          const_get_from start, name
+          candidates = []
+          candidates << const_get_from(start, name)
+          candidates << const_get_with_nested(start, name)
+          candidates = candidates.reject(&:nil?).uniq
+          raise ::ArgumentError, "Type name #{name} is ambigious(search base: #{start}): #{candidates.map(&:name).join(' and ')}" if candidates.size > 1
+          raise ::ArgumentError, "Type not found: #{name}(search base: #{start})" unless candidates.size == 1
+          candidates.first
         end
       end
-      def const_get_from root, name
+
+      def const_get_with_nested(start, name)
+        top = name.split(/::/).first
+        root = start
+        until root.nil?
+          return const_get_from(root, name) if root.const_defined?(top, false)
+          root = parent_nest(root)
+        end
+        nil
+      end
+
+      def parent_nest(klass)
+        return nil unless klass.name =~ /::/
+        name = klass.name.split(/::/)[0..-2].join('::')
+        const_get_from ::Object, name
+      end
+
+      def const_get_from(root, name)
+        begin
+          const_get_from! root, name
+        rescue NameError
+          nil
+        end
+      end
+
+      def const_get_from!(root, name)
         name.gsub(/^::/,'').split(/::/).inject(root) do|root, name|
           root.const_get(name.to_sym)
         end

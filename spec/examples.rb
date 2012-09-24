@@ -129,14 +129,17 @@ describe 'Usage examples' do
   end
 
   class RelativeTypeNames
-    include Typedocs::DSL
-    tdoc!"A"
-    def a; A.new; end
+    class Outer
+      include Typedocs::DSL
+
+      tdoc!"A"
+      def self.a; A.new; end
+    end
     class A; end
   end
   describe RelativeTypeNames do
     it do
-      RelativeTypeNames.new.a.should be_is_a(RelativeTypeNames::A)
+      RelativeTypeNames::Outer.a.should be_is_a(RelativeTypeNames::A)
     end
   end
 

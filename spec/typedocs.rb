@@ -2,7 +2,7 @@ load File.join(File.dirname(__FILE__), '..', 'lib', 'typedocs.rb')
 
 describe Typedocs::Parser do
   def parse(src)
-    Typedocs::Parser.new(Kernel, src).parse
+    Typedocs::Parser.new(::Object, src).parse
   end
   describe 'parsing single validation' do
     def spec_for(src)
@@ -19,7 +19,7 @@ describe Typedocs::Parser do
       it { should_not be_valid('string') }
     end
     describe 'is-a(nested name)' do
-      subject { spec_for '::Kernel::Numeric' }
+      subject { spec_for '::Object::Numeric' }
       it { should be_valid(1) }
       it { should_not be_valid('string') }
     end
@@ -112,7 +112,7 @@ end
 
 describe Typedocs::MethodSpec do
   def parse(src)
-    Typedocs::Parser.new(Kernel, src).parse
+    Typedocs::Parser.new(::Object, src).parse
   end
   def ok(*args,&block)
     case args.last
@@ -175,14 +175,18 @@ describe Typedocs::MethodSpec do
 end
 
 describe Typedocs::Validator::Type do
-  module A
-    module B
-      class C
+  before do
+    ::Object.module_eval do
+      module A
+        module B
+          class C
+          end
+        end
       end
     end
   end
-  it do
-    expect { Typedocs::Validator::Type.new(Kernel, 'C').valid? A::B::C.new }.to raise_error NameError
+  after do
+    ::Object.module_eval { remove_const :A }
   end
   it do
     Typedocs::Validator::Type.new(A::B, 'C').should be_valid(A::B::C.new)
