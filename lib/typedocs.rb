@@ -361,15 +361,19 @@ module Typedocs
 
   class Validator
     def validate_argument!(obj)
-      raise Typedocs::ArgumentError, "Expected #{description} but #{obj.inspect}" unless valid? obj
+      raise Typedocs::ArgumentError, "Expected #{description} but #{inspect_value obj}" unless valid? obj
     end
 
     def validate_retval!(obj)
-      raise Typedocs::RetValError, "Expected #{description} but #{obj.inspect}" unless valid? obj
+      raise Typedocs::RetValError, "Expected #{description} but #{inspect_value obj}" unless valid? obj
     end
 
     def validate_block!(obj)
       raise Typedocs::BlockError, "Bad value: #{obj.inspect}" unless valid? obj
+    end
+
+    def inspect_value(obj)
+      "#{obj.class.name}: #{obj.inspect}"
     end
 
     def valid?(obj)
