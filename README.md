@@ -55,7 +55,7 @@ end
     method_spec        = method_spec_single ('||' method_spec_single)*
     method_spec_single = (arg_spec '->')* (block_spec '->')? retval_spec
     retval_spec        = arg_spec
-    arg_spec           = simple_arg_spec ('|' simple_arg_spec)*
+    arg_spec           = (arg_spec_name ':')? simple_arg_spec ('|' simple_arg_spec)*
     simple_arg_spec    = type |  array | array_as_struct | any | hash_value | hash_type | dont_care
     block_spec         = '&' | '&?'
     type               = Class or Module name

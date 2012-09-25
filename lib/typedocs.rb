@@ -80,18 +80,6 @@ module Typedocs
       @src = StringScanner.new(src)
     end
 
-    # This is blueprint, not specification of current state.
-    #   method_spec := arg_spec? ('->' arg_spec?)*
-    #   arg_spec    := (spec) | spec '|' spec | atom | composite
-    #   atom        := type('(' value_specs ')')?
-    #   type        := type_name | any | dont_care | nil
-    #   dont_care   := '--'
-    #   value_specs := expression (',' expression)*
-    #   composite   := array | struct_array | hash
-    #   array  := spec...
-    #   struct_array := [spec(, spec)*]
-    #   hash        := {key_pattern: spec(, key_pattern: spec)*}
-    #   key_pattern := '?'? ( lit_symbol | lit_string | number )
     def parse
       return read_method_spec!
     end
@@ -146,6 +134,9 @@ module Typedocs
     end
 
     def read_arg_spec!
+      # Currently, name is accepted but unused
+      name = read_arg_spec_name
+
       spec = read_simple_arg_spec!
 
       skip_spaces
@@ -171,6 +162,14 @@ module Typedocs
       return Validator::Or.new(ret)
 
       raise "Should not reach here: #{current_source_info}"
+    end
+
+    def read_arg_spec_name
+      if match /[A-Za-z_0-9]+:/
+        matched.gsub(/:$/,'')
+      else
+        nil
+      end
     end
 
     def read_simple_arg_spec!

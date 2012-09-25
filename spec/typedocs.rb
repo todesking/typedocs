@@ -82,12 +82,19 @@ describe Typedocs::Parser do
         it { should_not be_valid({sym: 10}) }
         it { should_not be_valid(nil) }
       end
-      describe 'hash_type' do
-        subject { spec_for '{String => Integer}' }
+      shared_examples_for 'hash_type' do
         it { should be_valid({}) }
         it { should be_valid({'key' => 100}) }
         it { should_not be_valid({'key' => 'value'}) }
         it { should_not be_valid({:key => 100}) }
+      end
+      describe 'hash_type' do
+        subject { spec_for '{String => Integer}' }
+        it_should_behave_like 'hash_type'
+      end
+      describe 'named hash_type' do
+        subject { spec_for '{name:String => age:Integer}' }
+        it_should_behave_like 'hash_type'
       end
       # TODO: optional key
       # TODO: error if key duplicated
