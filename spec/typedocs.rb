@@ -75,8 +75,8 @@ describe Typedocs::Parser do
         it { should be_valid({}) }
         it { should_not be_valid({1 => 2}) }
       end
-      describe 'key-value' do
-        subject { spec_for '{symbol_key: Integer, "string_key": String}' }
+      describe 'hash_value' do
+        subject { spec_for '{:symbol_key => Integer, "string_key" => String}' }
         it { should be_valid({symbol_key: 10, "string_key" => "string"}) }
         it { should_not be_valid({symbol_key: 10, "string_key" => "string", a: 1}) }
         it { should_not be_valid({symbol_key: 10}) }

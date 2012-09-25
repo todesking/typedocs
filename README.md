@@ -55,16 +55,16 @@ end
     method_spec        = method_spec_single ('||' method_spec_single)*
     method_spec_single = (arg_spec '->')* (block_spec '->')? retval_spec
     retval_spec        = arg_spec
-    arg_spec           = or | simple_arg_spec
-    simple_arg_spec    = type |  array | array_as_struct | any | hash | dont_care
+    arg_spec           = simple_arg_spec ('|' simple_arg_spec)*
+    simple_arg_spec    = type |  array | array_as_struct | any | hash_value | hash_type | dont_care
     block_spec         = '&' | '&?'
     type               = Class or Module name
-    or                 = simple_arg_spec '|' simple_arg_spec
     array              = arg_spec...
     array_as_struct    = '[' arg_spec (',' arg_spec)* ']'
-    hash               = '{' hash_element (',' hash_element)* '}'
-    hash_element       = hash_key ':' arg_spec
-    hash_key           = 'String' | "String" | Symbol
+    hash_value         = '{' hash_element (',' hash_element)* '}'
+    hash_element       = hash_key '=>' arg_spec
+    hash_type          = '{' arg_spec '=>' arg_spec '}'
+    hash_key           = 'String' | "String" | :Symbol
     any                = '*'
     dont_care          = '' | '--'
 

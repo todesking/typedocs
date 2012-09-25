@@ -224,7 +224,7 @@ module Typedocs
     def read_hash_entry!
       key = read_hash_key!
       skip_spaces
-      match /:/ || (raise error_message :hash_colon)
+      match /\=>/ || (raise error_message :hash_colon)
       skip_spaces
       spec = read_arg_spec!
 
@@ -232,8 +232,8 @@ module Typedocs
     end
 
     def read_hash_key!
-      if match /[a-zA-Z]\w*[?!]?/
-        matched.to_sym
+      if match /:[a-zA-Z]\w*[?!]?/
+        matched.gsub(/^:/,'').to_sym
       elsif match /['"]/
         terminator = matched
         if match /([^\\#{terminator}]|\\.)*#{terminator}/
