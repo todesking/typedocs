@@ -39,7 +39,7 @@ describe 'Usage examples' do
         []
       end
 
-      tdoc!"* -> String | Integer"
+      tdoc!"_ -> String | Integer"
       def return_int_or_string(is_str)
         is_str ? 'string' : 100
       end

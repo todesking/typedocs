@@ -175,7 +175,7 @@ module Typedocs
     def read_simple_arg_spec!
       if match /(::)?[A-Z]\w*(::[A-Z]\w*)*/
         Validator::Type.new(@klass, matched.strip)
-      elsif match /\*/
+      elsif match /_/
         Validator::Any.instance
       elsif check /->/ or match /--/ or check /\|\|/ or eos?
         Validator::DontCare.instance

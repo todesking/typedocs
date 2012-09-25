@@ -34,7 +34,7 @@ describe Typedocs::Parser do
       it { should be_valid(nil) }
     end
     describe 'anything' do
-      subject { spec_for '*' }
+      subject { spec_for '_' }
       it { should be_valid(1) }
       it { should be_valid(nil) }
     end
