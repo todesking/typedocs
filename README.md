@@ -91,18 +91,17 @@ end
       name:spec style
       Validate name:spec style when name should refer argument name
       Block type specification
-      Hash{String -> Integer}
       Symbol(:a | :b | :c)
+      Boolean
       Values
         Integer(>0)
         String(not .empty?)
       Named specs
         @positive_int
       Duck typing(callable etc)
-    foo 1,2,skip_validation('3')
     Skip checking for specific argument
+      foo 1,2,skip_validation('3')
     Exception spec
-    Class methods
     Informative error message
     Method override
     Self hosting
