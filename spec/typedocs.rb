@@ -82,8 +82,15 @@ describe Typedocs::Parser do
         it { should_not be_valid({symbol_key: 10}) }
         it { should_not be_valid(nil) }
       end
-      # optional key
-      # error if key duplicated
+      describe 'hash_type' do
+        subject { spec_for '{String => Integer}' }
+        it { should be_valid({}) }
+        it { should be_valid({'key' => 100}) }
+        it { should_not be_valid({'key' => 'value'}) }
+        it { should_not be_valid({:key => 100}) }
+      end
+      # TODO: optional key
+      # TODO: error if key duplicated
     end
     # name:spec style
   end

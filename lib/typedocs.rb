@@ -192,15 +192,17 @@ module Typedocs
         match /\]/ || (raise error_message :array_end)
         Validator::ArrayAsStruct.new(specs)
       elsif match /{/
+        skip_spaces
         entries = []
-        begin
-          skip_spaces
-          break if check /}/
-          entries << read_hash_entry!
-          skip_spaces
-        end while match /,/
+        if check /['":]/
+          ret = read_hash_value!
+        elsif check /}/
+          ret = Validator::HashValue.new([])
+        else
+          ret = read_hash_type!
+        end
         match /}/ || (raise error_message :hash_end)
-        Validator::Hash.new(entries)
+        ret
       elsif match /nil/
         Validator::Nil.instance
       else
@@ -219,6 +221,27 @@ module Typedocs
       else
         nil
       end
+    end
+
+    def read_hash_type!
+      skip_spaces
+      key_spec = read_arg_spec!
+      skip_spaces
+      match /\=>/ or (raise error_message :hash_arrorw)
+      skip_spaces
+      value_spec = read_arg_spec!
+      Validator::HashType.new(key_spec, value_spec)
+    end
+
+    def read_hash_value!
+      entries = []
+      begin
+        skip_spaces
+        break if check /}/
+        entries << read_hash_entry!
+        skip_spaces
+      end while match /,/
+      Validator::HashValue.new(entries)
     end
 
     def read_hash_entry!
@@ -513,7 +536,7 @@ module Typedocs
       end
     end
 
-    class Hash < Validator
+    class HashValue < Validator
       # [key, spec]... ->
       def initialize(entries)
         @entries = entries
@@ -525,6 +548,21 @@ module Typedocs
       end
       def description
         "{#{@entries.map{|key,value| "#{key.inspect}: #{values.description}"}.join(',')}}"
+      end
+    end
+    
+    class HashType < Validator
+      def initialize(key_spec, value_spec)
+        @key_spec = key_spec
+        @value_spec = value_spec
+      end
+      def valid?(obj)
+        obj.is_a?(::Hash) &&
+          obj.keys.all?{|k| @key_spec.valid? k} &&
+          obj.values.all?{|v| @value_spec.valid? v}
+      end
+      def description
+        "{#{@key_spec.description} => #{@value_spec.description}}"
       end
     end
 
