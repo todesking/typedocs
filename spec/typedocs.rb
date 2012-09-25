@@ -76,10 +76,10 @@ describe Typedocs::Parser do
         it { should_not be_valid({1 => 2}) }
       end
       describe 'hash_value' do
-        subject { spec_for '{:symbol_key => Integer, "string_key" => String}' }
-        it { should be_valid({symbol_key: 10, "string_key" => "string"}) }
-        it { should_not be_valid({symbol_key: 10, "string_key" => "string", a: 1}) }
-        it { should_not be_valid({symbol_key: 10}) }
+        subject { spec_for '{:sym => Integer, "str" => String, \'str2\' => Symbol}' }
+        it { should be_valid({sym: 10, "str" => "string", "str2" => :a}) }
+        it { should_not be_valid({sym: 10, "str" => "string", "str2" => :a, a: 1}) }
+        it { should_not be_valid({sym: 10}) }
         it { should_not be_valid(nil) }
       end
       describe 'hash_type' do
