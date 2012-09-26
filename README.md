@@ -55,7 +55,7 @@ end
     method_spec        = method_spec_single ('||' method_spec_single)*
     method_spec_single = (arg_spec '->')* (block_spec '->')? retval_spec
     retval_spec        = arg_spec
-    arg_spec           = (arg_spec_name ':')? simple_arg_spec ('|' simple_arg_spec)*
+    arg_spec           = (arg_spec_name ':')? '*'? simple_arg_spec ('|' simple_arg_spec)*
     simple_arg_spec    = type |  array | array_as_struct | any | hash_value | hash_type | dont_care
     block_spec         = '&' | '&?'
     type               = Class or Module name
@@ -78,24 +78,33 @@ end
 
 ## TODO
 
+    rename tdoc! to tdoc
     Method spec definitions:
-      change 'any' symbol(*) to other something.
+      remove empty notation for dont_care
 
-      tdoc!"Integer? -> Integer"
+      tdoc!"?Integer -> Integer"
       def default_value i=10
 
       tdoc!"Integer -> String -> *Integer"
       def rest_args(a,b,*rest)
 
+      tdoc!"Integer -> *String -> ?Hash -> ?& -> --"
+      def foo(n, *names, opts={}, &block)
+
+      tdoc!"*_ ->"
+      def hoge(*any_objects)
+
+      tdoc!"*_... ->"
+      def hoge(*any_arrays)
+
     Basic validations:
-      name:spec style
       Validate name:spec style when name should refer argument name
       Block type specification
-      Symbol(:a | :b | :c)
       Boolean
       Values
         Integer(>0)
         String(not .empty?)
+        Symbol(:a | :b | :c)
       Named specs
         @positive_int
       Duck typing(callable etc)
@@ -107,6 +116,7 @@ end
     Self hosting
     Re-define existing method's spec
     Auto spec inference(from argument name)
+    attr_accessor
 
 
 * * * * *
