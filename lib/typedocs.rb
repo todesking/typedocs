@@ -20,8 +20,6 @@ module Typedocs
     end
 
     def self.included(klass)
-      klass.extend ClassMethods
-
       @typedocs_current_def = nil
 
       if Typedocs::DSL.enabled?
@@ -576,9 +574,6 @@ module Typedocs
         "#{@children.map(&:description).join(' | ')}"
       end
     end
-  end
-
-  module ClassMethods
   end
 
   class ArgumentError < ::ArgumentError; end
