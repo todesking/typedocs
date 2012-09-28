@@ -1,6 +1,6 @@
-require 'pp'
-require "typedocs/version"
 require 'strscan'
+
+require "typedocs/version"
 
 module Typedocs
 

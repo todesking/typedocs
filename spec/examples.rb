@@ -1,4 +1,4 @@
-load File.join(File.dirname(__FILE__), '..', 'lib', 'typedocs.rb')
+load File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe 'Usage examples' do
   describe 'Simple example' do
