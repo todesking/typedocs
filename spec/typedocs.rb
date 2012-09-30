@@ -214,14 +214,15 @@ module ArgumentSpecSpecSandbox
 end
 describe Typedocs::ArgumentSpec do
   let(:sandbox) { ArgumentSpecSpecSandbox }
+  let(:ns) { Typedocs::ArgumentSpec }
   describe '::Any' do
-    subject { Typedocs::ArgumentSpec::Any.new }
+    subject { ns::Any.new }
     it { should be_valid(nil) }
     its(:description) { should == '_' }
     it { expect { subject.error_message_for(nil) }.to raise_error }
   end
   describe '::DontCare' do
-    subject { Typedocs::ArgumentSpec::DontCare.new }
+    subject { ns::DontCare.new }
     it { should be_valid(nil) }
     its(:description) { should == '--' }
     it { expect { subject.error_message_for(nil) }.to raise_error }
@@ -233,11 +234,11 @@ describe Typedocs::ArgumentSpec do
       it { should_not be_valid(nil) }
     end
     describe 'with absolute name' do
-      subject { Typedocs::ArgumentSpec::Type.new sandbox, '::Integer' }
+      subject { ns::Type.new sandbox, '::Integer' }
       it_behaves_like 'Integer only'
     end
     describe 'with relative name' do
-      subject { Typedocs::ArgumentSpec::Type.new sandbox, 'Integer' }
+      subject { ns::Type.new sandbox, 'Integer' }
       it_behaves_like 'Integer only'
     end
   end
