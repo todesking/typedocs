@@ -83,6 +83,76 @@ module Typedocs
     end
   end
 
+  class ArgumentSpec
+    class Any < ArgumentSpec
+      def valid?(arg); true; end
+      def description; '_'; end
+      def error_message_for(arg)
+        raise "This spec accepts ANY value"
+      end
+    end
+    class DontCare < Any
+      def description; '--'; end
+    end
+    class Type < ArgumentSpec
+      def initialize(klass, name)
+        @klass = klass
+        @name = name
+      end
+      def target_klass
+        @target_klass ||= find_const @klass, @name
+      end
+      def valid?(arg); 
+        arg.is_a? target_klass
+      end
+      private
+      def find_const(start, name)
+        raise ::ArgumentError, 'name' if name.empty?
+        raise ::ArgumentError, 'start' unless start
+        case name
+        when /^::/
+          const_get_from! ::Object, name
+        else
+          candidates = []
+          candidates << const_get_from(start, name)
+          candidates << const_get_with_nested(start, name)
+          candidates = candidates.reject(&:nil?).uniq
+          raise ::ArgumentError, "Type name #{name} is ambigious(search base: #{start}): #{candidates.map(&:name).join(' and ')}" if candidates.size > 1
+          raise ::ArgumentError, "Type not found: #{name}(search base: #{start})" unless candidates.size == 1
+          candidates.first
+        end
+      end
+      def const_get_with_nested(start, name)
+        top = name.split(/::/).first
+        root = start
+        until root.nil?
+          return const_get_from(root, name) if root.const_defined?(top, false)
+          root = parent_nest(root)
+        end
+        nil
+      end
+      def parent_nest(klass)
+        return nil unless klass.name =~ /::/
+        name = klass.name.split(/::/)[0..-2].join('::')
+        const_get_from ::Object, name
+      end
+      def const_get_from(root, name)
+        begin
+          const_get_from! root, name
+        rescue NameError
+          nil
+        end
+      end
+      def const_get_from!(root, name)
+        name.gsub(/^::/,'').split(/::/).inject(root) do|root, name|
+          root.const_get(name.to_sym)
+        end
+      rescue NameError => e
+        raise NameError, "NameError: #{name.inspect}"
+      end
+    end
+  end
+
   class Validator
     def validate_argument!(obj)
       raise Typedocs::ArgumentError, "Expected #{description} but #{inspect_value obj}" unless valid? obj

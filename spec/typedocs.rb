@@ -209,3 +209,36 @@ describe Typedocs::Validator::Type do
     Typedocs::Validator::Type.new(A::B, '::A::B::C').should be_valid(A::B::C.new)
   end
 end
+
+module ArgumentSpecSpecSandbox
+end
+describe Typedocs::ArgumentSpec do
+  let(:sandbox) { ArgumentSpecSpecSandbox }
+  describe '::Any' do
+    subject { Typedocs::ArgumentSpec::Any.new }
+    it { should be_valid(nil) }
+    its(:description) { should == '_' }
+    it { expect { subject.error_message_for(nil) }.to raise_error }
+  end
+  describe '::DontCare' do
+    subject { Typedocs::ArgumentSpec::DontCare.new }
+    it { should be_valid(nil) }
+    its(:description) { should == '--' }
+    it { expect { subject.error_message_for(nil) }.to raise_error }
+  end
+  describe '::Type' do
+    shared_examples_for 'Integer only' do
+      it { should be_valid(1) }
+      it { should_not be_valid('1') }
+      it { should_not be_valid(nil) }
+    end
+    describe 'with absolute name' do
+      subject { Typedocs::ArgumentSpec::Type.new sandbox, '::Integer' }
+      it_behaves_like 'Integer only'
+    end
+    describe 'with relative name' do
+      subject { Typedocs::ArgumentSpec::Type.new sandbox, 'Integer' }
+      it_behaves_like 'Integer only'
+    end
+  end
+end
