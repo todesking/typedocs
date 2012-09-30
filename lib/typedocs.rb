@@ -94,7 +94,7 @@ module Typedocs
     class DontCare < Any
       def description; '--'; end
     end
-    class Type < ArgumentSpec
+    class TypeIsA < ArgumentSpec
       def initialize(klass, name)
         @klass = klass
         @name = name
@@ -102,7 +102,7 @@ module Typedocs
       def target_klass
         @target_klass ||= find_const @klass, @name
       end
-      def valid?(arg); 
+      def valid?(arg);
         arg.is_a? target_klass
       end
       private
@@ -149,6 +149,20 @@ module Typedocs
         end
       rescue NameError => e
         raise NameError, "NameError: #{name.inspect}"
+      end
+    end
+    class Nil < ArgumentSpec
+      def initialize
+        @value = nil
+      end
+      def valid?(obj)
+        obj == @value
+      end
+      def description
+        @value.inspect
+      end
+      def error_message_for(obj)
+        "#{obj} should == #{@value.inspect}"
       end
     end
   end
@@ -321,7 +335,7 @@ module Typedocs
         "{#{@entries.map{|key,value| "#{key.inspect}: #{values.description}"}.join(',')}}"
       end
     end
-    
+
     class HashType < Validator
       def initialize(key_spec, value_spec)
         @key_spec = key_spec

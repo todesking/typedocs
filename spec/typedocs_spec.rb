@@ -227,19 +227,26 @@ describe Typedocs::ArgumentSpec do
     its(:description) { should == '--' }
     it { expect { subject.error_message_for(nil) }.to raise_error }
   end
-  describe '::Type' do
+  describe '::TypeIsA' do
     shared_examples_for 'Integer only' do
       it { should be_valid(1) }
       it { should_not be_valid('1') }
       it { should_not be_valid(nil) }
     end
     describe 'with absolute name' do
-      subject { ns::Type.new sandbox, '::Integer' }
+      subject { ns::TypeIsA.new sandbox, '::Integer' }
       it_behaves_like 'Integer only'
     end
     describe 'with relative name' do
-      subject { ns::Type.new sandbox, 'Integer' }
+      subject { ns::TypeIsA.new sandbox, 'Integer' }
       it_behaves_like 'Integer only'
     end
+  end
+  describe '::Nil' do
+    subject { ns::Nil.new }
+    it { should be_valid(nil) }
+    it { should_not be_valid(1) }
+    its(:description) { should == 'nil' }
+    it { subject.error_message_for(1).should == "1 should == nil" }
   end
 end
