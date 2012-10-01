@@ -188,7 +188,7 @@ describe Typedocs::MethodSpec do
   end
 end
 
-describe Typedocs::Validator::Type do
+describe Typedocs::ArgumentSpec::TypeIsA do
   before do
     ::Object.module_eval do
       module A
@@ -203,10 +203,10 @@ describe Typedocs::Validator::Type do
     ::Object.module_eval { remove_const :A }
   end
   it do
-    Typedocs::Validator::Type.new(A::B, 'C').should be_valid(A::B::C.new)
+    Typedocs::ArgumentSpec::TypeIsA.new(A::B, 'C').should be_valid(A::B::C.new)
   end
   it do
-    Typedocs::Validator::Type.new(A::B, '::A::B::C').should be_valid(A::B::C.new)
+    Typedocs::ArgumentSpec::TypeIsA.new(A::B, '::A::B::C').should be_valid(A::B::C.new)
   end
 end
 
@@ -273,7 +273,29 @@ describe Typedocs::ArgumentSpec do
   describe '::HashValue' do
     subject { ns::HashValue.new([[:foo, ns::TypeIsA.new(Object, 'Integer')], ['bar', ns::Nil.new]]) }
     it { should be_valid({foo: 1, 'bar' => nil}) }
+    it { should_not be_valid({}) }
+    it { should_not be_valid({foo: 1}) }
     it { should_not be_valid({foo: 1, 'bar' => nil, baz: 99}) }
     its(:description) { should == '{:foo => Integer, "bar" => nil}' }
+  end
+  describe '::HashType' do
+    subject { ns::HashType.new(ns::TypeIsA.new(Object, 'Integer'), ns::TypeIsA.new(Object, 'String')) }
+    it { should be_valid({1 => "a"}) }
+    it { should be_valid({}) }
+    it { should_not be_valid({1 => 1}) }
+    it { should_not be_valid({1 => "a", 2 => 2}) }
+    its(:description) { should == '{Integer => String}' }
+  end
+  describe '::Or' do
+    describe 'when empty' do
+      it { expect { ns::Or.new([]) }.to raise_error ::ArgumentError }
+    end
+    describe 'Integer|nil' do
+      subject { ns::Or.new([ns::TypeIsA.new(Object, 'Integer'), ns::Nil.new]) }
+      it { should be_valid(nil) }
+      it { should be_valid(1) }
+      it { should_not be_valid("str") }
+      its(:description) { should == "Integer|nil" }
+    end
   end
 end

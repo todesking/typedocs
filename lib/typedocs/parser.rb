@@ -52,7 +52,7 @@ class Typedocs::Parser
     end
     skip_spaces
 
-    arg_specs = [Typedocs::Validator::DontCare.instance] if arg_specs.empty?
+    arg_specs = [Typedocs::ArgumentSpec::DontCare.new] if arg_specs.empty?
 
     return Typedocs::MethodSpec::Single.new arg_specs[0..-2], block_spec, arg_specs[-1]
   end
@@ -70,7 +70,7 @@ class Typedocs::Parser
     end
 
     if match /\.\.\./
-      spec = Typedocs::Validator::Array.new(spec)
+      spec = Typedocs::ArgumentSpec::Array.new(spec)
     end
 
     skip_spaces
@@ -83,7 +83,7 @@ class Typedocs::Parser
       ret << read_arg_spec!
       skip_spaces
     end
-    return Typedocs::Validator::Or.new(ret)
+    return Typedocs::ArgumentSpec::Or.new(ret)
 
     raise "Should not reach here: #{current_source_info}"
   end
@@ -97,12 +97,13 @@ class Typedocs::Parser
   end
 
   def read_simple_arg_spec!
+    ns = ::Typedocs::ArgumentSpec
     if match /(::)?[A-Z]\w*(::[A-Z]\w*)*/
-      Typedocs::Validator::Type.new(@klass, matched.strip)
+      ns::TypeIsA.new(@klass, matched.strip)
     elsif match /_/
-      Typedocs::Validator::Any.instance
+      ns::Any.new
     elsif check /->/ or match /--/ or check /\|\|/ or eos?
-      Typedocs::Validator::DontCare.instance
+      ns::DontCare.new
     elsif match /\[/
       specs = []
       begin
@@ -113,34 +114,35 @@ class Typedocs::Parser
       end while match /,/
       skip_spaces
       match /\]/ || (raise error_message :array_end)
-      Typedocs::Validator::ArrayAsStruct.new(specs)
+      ns::ArrayAsStruct.new(specs)
     elsif match /{/
       skip_spaces
       entries = []
       if check /['":]/
         ret = read_hash_value!
       elsif check /}/
-        ret = Typedocs::Validator::HashValue.new([])
+        ret = ns::HashValue.new([])
       else
         ret = read_hash_type!
       end
       match /}/ || (raise error_message :hash_end)
       ret
     elsif match /nil/
-      Typedocs::Validator::Nil.instance
+      ns::Nil.new
     else
       raise error_message :arg_spec
     end
   end
 
   def read_block_spec
+    ns = Typedocs::ArgumentSpec
     if match /&\?/
-      Typedocs::Validator::Or.new([
-        Typedocs::Validator::Type.new(@klass, '::Proc'),
-        Typedocs::Validator::Nil.instance,
+      ns::Or.new([
+        ns::TypeIsA.new(@klass, '::Proc'),
+        ns::Nil.new,
       ])
     elsif match /&/
-      Typedocs::Validator::Type.new(@klass, '::Proc')
+      ns::TypeIsA.new(@klass, '::Proc')
     else
       nil
     end
@@ -153,7 +155,7 @@ class Typedocs::Parser
     match /\=>/ or (raise error_message :hash_arrorw)
     skip_spaces
     value_spec = read_arg_spec!
-    Typedocs::Validator::HashType.new(key_spec, value_spec)
+    Typedocs::ArgumentSpec::HashType.new(key_spec, value_spec)
   end
 
   def read_hash_value!
@@ -164,7 +166,7 @@ class Typedocs::Parser
       entries << read_hash_entry!
       skip_spaces
     end while match /,/
-    Typedocs::Validator::HashValue.new(entries)
+    Typedocs::ArgumentSpec::HashValue.new(entries)
   end
 
   def read_hash_entry!
