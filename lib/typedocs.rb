@@ -184,7 +184,33 @@ module Typedocs
         "[#{@specs.map(&:description).join(', ')}]"
       end
     end
+    class Array < ArgumentSpec
+      def initialize(spec)
+        @spec = spec
+      end
+      def valid?(obj)
+          obj.is_a?(::Array) && obj.all?{|elm| @spec.valid?(elm)}
+      end
+      def description
+        "#{@spec.description}..."
+      end
+    end
+    class HashValue < ArgumentSpec
+      # [key, spec]... ->
+      def initialize(entries)
+        @entries = entries
+      end
+      def valid?(obj)
+        obj.is_a?(::Hash) &&
+        @entries.size == obj.size &&
+        @entries.all? {|key, spec| obj.has_key?(key) && spec.valid?(obj[key]) }
+      end
+      def description
+        "{#{@entries.map{|key,value| "#{key.inspect} => #{value.description}"}.join(', ')}}"
+      end
+    end
   end
+
 
   class Validator
     def validate_argument!(obj)

@@ -260,4 +260,20 @@ describe Typedocs::ArgumentSpec do
     it { should_not be_valid([1, nil, 1]) }
     its(:description) { should == '[Integer, nil]' }
   end
+  describe '::Array' do
+    subject { ns::Array.new(ns::TypeIsA.new(Object, 'Integer')) }
+    it { should be_valid([]) }
+    it { should be_valid([1]) }
+    it { should be_valid([1,2,3]) }
+    it { should_not be_valid(1) }
+    it { should_not be_valid([nil]) }
+    it { should_not be_valid([1,nil,2]) }
+    its(:description) { should == 'Integer...' }
+  end
+  describe '::HashValue' do
+    subject { ns::HashValue.new([[:foo, ns::TypeIsA.new(Object, 'Integer')], ['bar', ns::Nil.new]]) }
+    it { should be_valid({foo: 1, 'bar' => nil}) }
+    it { should_not be_valid({foo: 1, 'bar' => nil, baz: 99}) }
+    its(:description) { should == '{:foo => Integer, "bar" => nil}' }
+  end
 end
