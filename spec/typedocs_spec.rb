@@ -235,10 +235,12 @@ describe Typedocs::ArgumentSpec do
     end
     describe 'with absolute name' do
       subject { ns::TypeIsA.new sandbox, '::Integer' }
+      its(:description) { should == "::Integer" }
       it_behaves_like 'Integer only'
     end
     describe 'with relative name' do
       subject { ns::TypeIsA.new sandbox, 'Integer' }
+      its(:description) { should == "Integer" }
       it_behaves_like 'Integer only'
     end
   end
@@ -248,5 +250,14 @@ describe Typedocs::ArgumentSpec do
     it { should_not be_valid(1) }
     its(:description) { should == 'nil' }
     it { subject.error_message_for(1).should == "1 should == nil" }
+  end
+  describe '::ArrayAsStruct' do
+    subject { ns::ArrayAsStruct.new([ns::TypeIsA.new(Object,'Integer'), ns::Nil.new]) }
+    it { should be_valid([1, nil]) }
+    it { should_not be_valid(1) }
+    it { should_not be_valid([nil, nil]) }
+    it { should_not be_valid([]) }
+    it { should_not be_valid([1, nil, 1]) }
+    its(:description) { should == '[Integer, nil]' }
   end
 end

@@ -84,6 +84,9 @@ module Typedocs
   end
 
   class ArgumentSpec
+    def error_message_for(obj)
+      "Expected #{self.description}, but #{obj.inspect}"
+    end
     class Any < ArgumentSpec
       def valid?(arg); true; end
       def description; '_'; end
@@ -104,6 +107,9 @@ module Typedocs
       end
       def valid?(arg);
         arg.is_a? target_klass
+      end
+      def description
+        @name
       end
       private
       def find_const(start, name)
@@ -163,6 +169,19 @@ module Typedocs
       end
       def error_message_for(obj)
         "#{obj} should == #{@value.inspect}"
+      end
+    end
+    class ArrayAsStruct < ArgumentSpec
+      def initialize(specs)
+        @specs = specs
+      end
+      def valid?(obj)
+        obj.is_a?(::Array) &&
+        @specs.size == obj.size &&
+        @specs.zip(obj).all?{|spec,elm| spec.valid?(elm)}
+      end
+      def description
+        "[#{@specs.map(&:description).join(', ')}]"
       end
     end
   end
