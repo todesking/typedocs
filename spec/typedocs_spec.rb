@@ -299,3 +299,101 @@ describe Typedocs::ArgumentSpec do
     end
   end
 end
+
+class ValueEquals
+  def initialize(val)
+    @val = val
+  end
+  def valid?(val)
+    val == @val
+  end
+end
+describe 'ensure ValueEquals helper works' do
+  subject { ValueEquals }
+  it { subject.new(1).should be_valid(1) }
+  it { subject.new(1).should_not be_valid(2) }
+end
+describe Typedocs::ArgumentsSpec do
+  def val(v)
+    ValueEquals.new(v)
+  end
+  subject { Typedocs::ArgumentsSpec.new }
+  describe 'with ()' do
+    it { should be_valid([]) }
+    it { should_not be_valid([:a]) }
+  end
+  describe 'with (a)' do
+    before do
+      subject.add_required(val :a)
+    end
+    it { should be_valid([:a]) }
+    it { should_not be_valid([]) }
+    it { should_not be_valid([:a,:b]) }
+  end
+  describe 'with (?a)' do
+    before do
+      subject.add_optional(val :a)
+    end
+    it { should be_valid([:a]) }
+    it { should be_valid([]) }
+    it { should_not be_valid([:a,:b]) }
+  end
+  describe 'with (a, ?b, ?c)' do
+    before do
+      subject.add_required(val :a)
+      subject.add_optional(val :b)
+      subject.add_optional(val :c)
+    end
+    it { should be_valid([:a]) }
+    it { should be_valid([:a,:b]) }
+    it { should be_valid([:a,:b,:c]) }
+    it { should_not be_valid([:a,:b,:c,:d]) }
+    it { should_not be_valid([]) }
+  end
+  describe 'with (*a)' do
+    before do
+      subject.add_rest(val :a)
+    end
+    it { should be_valid([]) }
+    it { should be_valid([:a]) }
+    it { should be_valid([:a,:a,:a]) }
+    it { should_not be_valid([:a,:b]) }
+  end
+  describe 'with (a, *b)' do
+    before do
+      subject.add_required(val :a)
+      subject.add_rest(val :b)
+    end
+    it { should be_valid([:a]) }
+    it { should be_valid([:a,:b,:b]) }
+    it { should_not be_valid([:a,:b,:c]) }
+    it { should_not be_valid([]) }
+  end
+  describe 'with (*a, b)' do
+    before do
+      subject.add_rest(val :a)
+      subject.add_required(val :b)
+    end
+    it { should be_valid([:b]) }
+    it { should be_valid([:a, :b]) }
+    it { should be_valid([:a, :a, :b]) }
+    it { should_not be_valid([:a, :b, :b]) }
+    it { should_not be_valid([]) }
+    it { should_not be_valid([:c]) }
+  end
+  describe 'with (a, *b, c)' do
+    before do
+      subject.add_required(val :a)
+      subject.add_rest(val :b)
+      subject.add_required(val :c)
+    end
+    it { should be_valid([:a, :c]) }
+    it { should be_valid([:a, :b, :c]) }
+    it { should be_valid([:a, :b, :b, :c]) }
+    it { should_not be_valid([:a, :b, :c, :c]) }
+    it { should_not be_valid([:a]) }
+  end
+  describe 'with (a, ?b, c)' # error
+  describe 'with (a, *b, *c)' # error
+  describe 'with (a, *b, ?c)' # error
+end

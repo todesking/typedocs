@@ -84,6 +84,59 @@ module Typedocs
     end
   end
 
+  class ArgumentsSpec
+    def initialize
+      @arguments = []
+      @min_len = 0
+      @max_len = 0
+      @required_head_len = 0
+      @required_tail_len = 0
+      @has_rest = false
+    end
+    def valid?(args)
+      return false unless (@min_len..@max_len).include? args.length
+      args[0...@required_head_len].zip(@arguments).each do|arg, (type, spec)|
+        return false unless spec.valid?(arg)
+      end
+      if @has_rest
+        rest_spec = @arguments[@required_head_len][1]
+        rest_args = if @required_tail_len > 0
+                      args[@required_head_len...-@required_tail_len]
+                    else
+                      args[@required_head_len..-1]
+                    end
+        rest_args.each do|arg|
+          return false unless rest_spec.valid? arg
+        end
+      end
+      if @required_tail_len > 0
+        args[-@required_tail_len..-1].zip(@arguments[-@required_tail_len..-1]).each do|arg, (type, spec)|
+          return false unless spec.valid?(arg)
+        end
+      end
+      return true
+    end
+    def add_required(arg_spec)
+      @arguments.push [:req, arg_spec]
+      @min_len += 1
+      @max_len += 1
+      if @has_rest
+        @required_tail_len += 1
+      else
+        @required_head_len += 1
+      end
+    end
+    def add_optional(arg_spec)
+      @arguments.push [:opt, arg_spec]
+      @max_len += 1
+    end
+    def add_rest(arg_spec)
+      @arguments.push [:rest, arg_spec]
+      @max_len = Float::INFINITY
+      @has_rest = true
+    end
+  end
+
   class ArgumentSpec
     def error_message_for(obj)
       "Expected #{self.description}, but #{obj.inspect}"
