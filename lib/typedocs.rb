@@ -84,56 +84,103 @@ module Typedocs
     end
   end
 
+  # Ruby argument pattern:
+  # - required* optional* (rest requied*)?
+  # - optional+ requied* # optional is matched forward-wise
+  #
+  # s1 +-opt-> s2 +--req--> s3
+  #    |          |
+  #    +----------+---------+--rest--> s6 -req-> s7
+  #    |         /         /
+  #    `-req-> s4 -opt-> s5
   class ArgumentsSpec
     def initialize
-      @arguments = []
-      @min_len = 0
-      @max_len = 0
-      @required_head_len = 0
-      @required_tail_len = 0
-      @has_rest = false
+      # [[type, [spec ...]] ...]
+      @specs = []
+      @current = nil
     end
     def valid?(args)
-      return false unless (@min_len..@max_len).include? args.length
-      args[0...@required_head_len].zip(@arguments).each do|arg, (type, spec)|
-        return false unless spec.valid?(arg)
-      end
-      if @has_rest
-        rest_spec = @arguments[@required_head_len][1]
-        rest_args = if @required_tail_len > 0
-                      args[@required_head_len...-@required_tail_len]
-                    else
-                      args[@required_head_len..-1]
-                    end
-        rest_args.each do|arg|
-          return false unless rest_spec.valid? arg
-        end
-      end
-      if @required_tail_len > 0
-        args[-@required_tail_len..-1].zip(@arguments[-@required_tail_len..-1]).each do|arg, (type, spec)|
-          return false unless spec.valid?(arg)
-        end
-      end
-      return true
+      matched = match(args)
+      matched && matched.all? {|arg, spec| spec.valid? arg}
     end
     def add_required(arg_spec)
-      @arguments.push [:req, arg_spec]
-      @min_len += 1
-      @max_len += 1
-      if @has_rest
-        @required_tail_len += 1
-      else
-        @required_head_len += 1
-      end
+      _add :req, arg_spec
     end
     def add_optional(arg_spec)
-      @arguments.push [:opt, arg_spec]
-      @max_len += 1
+      _add :opt, arg_spec
     end
     def add_rest(arg_spec)
-      @arguments.push [:rest, arg_spec]
-      @max_len = Float::INFINITY
-      @has_rest = true
+      _add :res, arg_spec
+    end
+    private
+    # args:[...] -> success:[[arg,spec]...] | fail:nil
+    def match(args)
+      types = @specs.map{|t,s|t}
+      case types
+      when [:opt, :req]
+        opt, req = @specs.map{|t,s|s}
+        return nil unless (req.length..(req.length+opt.length)) === args.size
+        args[0...-req.length].zip(opt).to_a + req.zip(args[-req.length..-1]).to_a
+      else
+        # [reqs, opts, rest, reqs]
+        partial = []
+        i = 0
+        if types[i] == :req
+          partial.push @specs[i][1]
+          i += 1
+        else
+          partial.push []
+        end
+        if types[i] == :opt
+          partial.push @specs[i][1]
+          i += 1
+        else
+          partial.push []
+        end
+        if types[i] == :res
+          partial.push @specs[i][1]
+          i += 1
+        else
+          partial.push []
+        end
+        if types[i] == :req
+          partial.push @specs[i][1]
+          i += 1
+        else
+          partial.push []
+        end
+        return nil unless i == types.length
+        reqs, opts, rest, reqs2 = partial
+        raise unless rest.length < 2
+
+        len_min = reqs.length + reqs2.length
+        if rest.empty?
+          len_max = reqs.length + opts.length + reqs2.length
+          return nil unless (len_min..len_max) === args.length
+        else
+          return nil unless len_min <= args.length
+        end
+        reqs_args = args.shift(reqs.length)
+        reqs2_args = args.pop(reqs2.length)
+        opts_args = args.shift([opts.length, args.length].min)
+        rest_args = args
+
+        rest_spec = rest[0]
+        return [
+          *reqs_args.zip(reqs),
+          *opts_args.zip(opts),
+          *(rest_spec ? rest_args.map{|a|[a, rest_spec]} : []),
+          *reqs2_args.zip(reqs2),
+        ]
+      end
+    end
+    def _add(type,spec)
+      if @current == type
+        @specs.last[1].push spec
+      else
+        @specs.push [type, [spec]]
+        @current = type
+      end
     end
   end
 

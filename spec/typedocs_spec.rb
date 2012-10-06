@@ -307,6 +307,9 @@ class ValueEquals
   def valid?(val)
     val == @val
   end
+  def inspect
+    "(== #{@val.inspect})"
+  end
 end
 describe 'ensure ValueEquals helper works' do
   subject { ValueEquals }
@@ -392,6 +395,19 @@ describe Typedocs::ArgumentsSpec do
     it { should be_valid([:a, :b, :b, :c]) }
     it { should_not be_valid([:a, :b, :c, :c]) }
     it { should_not be_valid([:a]) }
+  end
+  describe 'with (?a, *b, c)' do
+    before do
+      subject.add_optional(val :a)
+      subject.add_rest(val :b)
+      subject.add_required(val :c)
+    end
+    it { should be_valid([:c]) }
+    it { should be_valid([:a, :c]) }
+    it { should be_valid([:a, :b, :c]) }
+    it { should be_valid([:a, :b, :b, :c]) }
+    it { should_not be_valid([]) }
+    it { should_not be_valid([:a, :b, :c, :c]) }
   end
   describe 'with (a, ?b, c)' # error
   describe 'with (a, *b, *c)' # error
