@@ -55,7 +55,8 @@ end
     method_spec        = method_spec_single ('||' method_spec_single)*
     method_spec_single = (arg_spec '->')* (block_spec '->')? retval_spec
     retval_spec        = arg_spec
-    arg_spec           = (arg_spec_name ':')? '*'? simple_arg_spec ('|' simple_arg_spec)*
+    arg_spec           = (arg_spec_name ':')? arg_option? simple_arg_spec ('|' simple_arg_spec)*
+    arg_option         = '?' | '*' # optional / rest
     simple_arg_spec    = type |  array | array_as_struct | any | hash_value | hash_type | dont_care
     block_spec         = '&' | '&?'
     type               = Class or Module name
@@ -81,24 +82,10 @@ end
     rename tdoc! to tdoc
     Method spec definitions:
       remove empty notation for dont_care
-
-      tdoc!"?Integer -> Integer"
-      def default_value i=10
-
-      tdoc!"Integer -> String -> *Integer"
-      def rest_args(a,b,*rest)
-
-      tdoc!"Integer -> *String -> ?Hash -> ?& -> --"
-      def foo(n, *names, opts={}, &block)
-
-      tdoc!"*_ ->"
-      def hoge(*any_objects)
-
-      tdoc!"*_... ->"
-      def hoge(*any_arrays)
+      change array notation: [spec ...]
+      hash value accepts unspecified keys: { :key => spec, ...}
 
     Basic validations:
-      Validate name:spec style when name should refer argument name
       Block type specification
       Boolean
       Values
