@@ -23,7 +23,7 @@ class Typedocs::Parser
     if specs.size == 1
       return specs.first
     else
-      Typedocs::MethodSpec::Any.new(specs)
+      Typedocs::MethodSpec::AnyOf.new(specs)
     end
   end
 

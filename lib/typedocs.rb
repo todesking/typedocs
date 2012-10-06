@@ -8,7 +8,7 @@ require "typedocs/parser"
 
 module Typedocs
   module MethodSpec
-    class Any
+    class AnyOf
       # [Single] ->
       def initialize(specs)
         @specs = specs
