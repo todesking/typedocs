@@ -5,7 +5,7 @@ describe 'Usage examples' do
     class SimpleExample
       include Typedocs::DSL
 
-      tdoc!"Numeric -> Numeric"
+      tdoc "Numeric -> Numeric"
       def square x
         x * x
       end
@@ -19,32 +19,32 @@ describe 'Usage examples' do
     class BasicUsage
       include Typedocs::DSL
 
-      tdoc!"Numeric -> Numeric"
+      tdoc "Numeric -> Numeric"
       def square(x)
         x * x
       end
 
-      tdoc!"String"
+      tdoc "String"
       def expected_string_but_nil
         nil
       end
 
-      tdoc!"Numeric -> [Integer,String]"
+      tdoc "Numeric -> [Integer,String]"
       def return_pair(num)
         [num.to_i, num.to_s]
       end
 
-      tdoc!"[]"
+      tdoc "[]"
       def return_empty_array
         []
       end
 
-      tdoc!"_ -> String | Integer"
+      tdoc "_ -> String | Integer"
       def return_int_or_string(is_str)
         is_str ? 'string' : 100
       end
 
-      tdoc!"nil"
+      tdoc "nil"
       def return_nil
         nil
       end
@@ -82,7 +82,7 @@ describe 'Usage examples' do
     Typedocs::DSL.do_nothing
     class Unchecked
       include Typedocs::DSL
-      tdoc!"Integer"
+      tdoc "Integer"
       def not_integer
         nil
       end
@@ -98,7 +98,7 @@ describe 'Usage examples' do
   class Initialize
     include Typedocs::DSL
 
-    tdoc!"Integer ->"
+    tdoc "Integer ->"
     def initialize(n)
     end
   end
@@ -114,7 +114,7 @@ describe 'Usage examples' do
   class ClassMethods
     include Typedocs::DSL
 
-    tdoc!"String->Integer"
+    tdoc "String->Integer"
     def self.class_method(s); s.to_i; end
 
     def untyped_instance_method(arg); arg; end
@@ -132,7 +132,7 @@ describe 'Usage examples' do
     class Outer
       include Typedocs::DSL
 
-      tdoc!"A"
+      tdoc "A"
       def self.a; A.new; end
     end
     class A; end

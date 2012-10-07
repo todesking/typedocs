@@ -18,7 +18,7 @@ module Typedocs::DSL
 
     if Typedocs::DSL.enabled?
       class << klass
-        def tdoc!(doc_str)
+        def tdoc(doc_str)
           @typedocs_current_def = ::Typedocs::DSL.parse self, doc_str
         end
 
@@ -45,7 +45,7 @@ module Typedocs::DSL
       end
     else
       class << klass
-        def tdoc!(doc_str); end
+        def tdoc(doc_str); end
       end
     end
   end
