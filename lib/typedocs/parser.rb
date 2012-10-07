@@ -52,8 +52,7 @@ class Typedocs::Parser
     end
     skip_spaces
 
-    # TODO rm
-    arg_specs = [[:req, Typedocs::ArgumentSpec::DontCare.new]] if arg_specs.empty?
+    block_spec ||= Typedocs::ArgumentSpec::Nil.new
 
     ret_spec = arg_specs.pop[1]
 

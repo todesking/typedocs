@@ -117,34 +117,28 @@ describe Typedocs::Parser do
   describe 'parsing complex arguments' do
     def self.when_parsing(tdoc, &block)
       describe "when parsing '#{tdoc}'", do
-        def self.about_arguments(&block)
-          describe('arguments') do
-            subject { method_spec.arguments_spec }
-            def self.valid(args)
-              it { should be_valid(args) }
-            end
-            def self.invalid(args)
-              it { should_not be_valid(args) }
-            end
-            self.instance_eval &block
-          end
+        def self.its_arguments_should_accept(args)
+          it { method_spec.arguments_spec.should be_valid(args) }
         end
-        def self.it_should_take_block_required
-          it('should take block(required)'){
-            method_spec.block_spec.should be_valid(lambda{})
-            method_spec.block_spec.should_not be_valid(nil)
+        def self.its_arguments_should_not_accept(args)
+          it { method_spec.arguments_spec.should_not be_valid(args) }
+        end
+        def self.its_block_is_required
+          its(:block_spec) {
+            should be_valid(lambda{})
+            should_not be_valid(nil)
           }
         end
-        def self.it_should_take_block_optional
-          it('should take block(optiona)'){
-            method_spec.block_spec.should_not be_valid(lambda{})
-            method_spec.block_spec.should be_valid(nil)
+        def self.its_block_should_optional
+          its(:block_spec) {
+            should be_valid(lambda{})
+            should be_valid(nil)
           }
         end
-        def self.it_should_not_take_blocks
-          it('should not take block'){
-            method_spec.block_spec.should_not be_valid(lambda{})
-            method_spec.block_spec.should be_valid(nil)
+        def self.its_block_should_none
+          its(:block_spec) {
+            should_not be_valid(lambda{})
+            should be_valid(nil)
           }
         end
         def self.about_retval
@@ -164,14 +158,15 @@ describe Typedocs::Parser do
       end
     end
     when_parsing('Integer') do
-      about_arguments do
-        valid []
-        invalid [1]
-      end
+      its_arguments_should_accept []
+      its_arguments_should_not_accept [1]
+      its_block_should_none
       about_retval do
         valid 1
         invalid nil
       end
+    end
+    when_parsing('Integer -> Integer') do
     end
   end
 end
