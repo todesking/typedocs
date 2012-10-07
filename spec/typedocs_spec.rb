@@ -141,6 +141,12 @@ describe Typedocs::Parser do
             should be_valid(nil)
           }
         end
+        def self.its_retval_should_accept(val)
+          its(:retval_spec) { should be_valid(val) }
+        end
+        def self.its_retval_should_not_accept(val)
+          its(:retval_spec) { should_not be_valid(val) }
+        end
         def self.about_retval
           describe 'retval' do
             subject { method_spec.retval_spec }
@@ -161,10 +167,8 @@ describe Typedocs::Parser do
       its_arguments_should_accept []
       its_arguments_should_not_accept [1]
       its_block_should_none
-      about_retval do
-        valid 1
-        invalid nil
-      end
+      its_retval_should_accept 1
+      its_retval_should_not_accept nil
     end
     when_parsing('Integer -> Integer') do
     end
