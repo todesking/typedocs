@@ -123,6 +123,10 @@ describe Typedocs::Parser do
         def self.its_arguments_should_not_accept(args)
           it { method_spec.arguments_spec.should_not be_valid(args) }
         end
+        def self.its_arguments_should_accept_empty_only
+          its_arguments_should_accept []
+          its_arguments_should_not_accept [1]
+        end
         def self.its_block_is_required
           its(:block_spec) {
             should be_valid(lambda{})
@@ -163,14 +167,40 @@ describe Typedocs::Parser do
         self.instance_eval &block
       end
     end
-    when_parsing('Integer') do
-      its_arguments_should_accept []
-      its_arguments_should_not_accept [1]
+    when_parsing 'Integer' do
+      its_arguments_should_accept_empty_only
+
       its_block_should_none
+
       its_retval_should_accept 1
       its_retval_should_not_accept nil
     end
-    when_parsing('Integer -> Integer') do
+    when_parsing 'Integer -> Integer' do
+      its_arguments_should_accept [1]
+      its_arguments_should_not_accept []
+
+      its_block_should_none
+
+      its_retval_should_accept 1
+      its_retval_should_not_accept nil
+    end
+    when_parsing 'Integer|nil' do
+      its_arguments_should_accept_empty_only
+
+      its_block_should_none
+
+      its_retval_should_accept 1
+      its_retval_should_accept nil
+      its_retval_should_not_accept :a
+    end
+    when_parsing '& -> Symbol' do
+      pending
+    end
+    when_parsing '?& -> Symbol' do
+      pending
+    end
+    when_parsing '*Integer -> Symbol' do
+      pending
     end
   end
 end
