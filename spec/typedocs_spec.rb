@@ -63,8 +63,8 @@ describe Typedocs::Parser do
       it { should be_valid(nil) }
       it { should_not be_valid(1) }
     end
-    describe '...' do
-      subject { spec_for 'Integer...' }
+    describe '[...]' do
+      subject { spec_for '[Integer...]' }
       it { should be_valid([1,2,3]) }
       it { should be_valid([]) }
       it { should_not be_valid(['a']) }
@@ -211,6 +211,19 @@ describe Typedocs::Parser do
 
       its_block_should_none
       its_retval_should_accept nil
+    end
+    when_parsing '[Integer] -> nil' do
+      its_arguments_should_accept [[1]]
+      its_arguments_should_not_accept [[1, 2]]
+    end
+    when_parsing '[Integer, String] -> nil' do
+      its_arguments_should_accept [[1, 'foo']]
+      its_arguments_should_not_accept [[1, 2]]
+    end
+    when_parsing '[Integer...] -> nil' do
+      its_arguments_should_accept [[]]
+      its_arguments_should_accept [[1,2,3]]
+      its_arguments_should_not_accept [[nil]]
     end
   end
 end

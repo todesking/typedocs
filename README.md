@@ -60,7 +60,7 @@ end
     simple_arg_spec    = type |  array | array_as_struct | any | hash_value | hash_type | dont_care
     block_spec         = '&' | '&?'
     type               = Class or Module name
-    array              = arg_spec...
+    array              = '[' arg_spec '...]'
     array_as_struct    = '[' arg_spec (',' arg_spec)* ']'
     hash_value         = '{' hash_element (',' hash_element)* '}'
     hash_element       = hash_key '=>' arg_spec
@@ -80,7 +80,6 @@ end
 ## TODO
 
     Method spec definitions:
-      change array notation: [spec ...]
       hash value accepts unspecified keys: { :key => spec, ...}
 
     Basic validations:

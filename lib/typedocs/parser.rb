@@ -106,11 +106,6 @@ class Typedocs::Parser
       return spec
     end
 
-    if match /\.\.\./
-      spec = Typedocs::ArgumentSpec::Array.new(spec)
-    end
-
-    skip_spaces
     return spec unless check /\|/
 
     ret = [spec]
@@ -121,8 +116,6 @@ class Typedocs::Parser
       skip_spaces
     end
     return Typedocs::ArgumentSpec::Or.new(ret)
-
-    raise "Should not reach here: #{current_source_info}"
   end
 
   def read_arg_spec_name
@@ -148,6 +141,11 @@ class Typedocs::Parser
         break if check /\]/
         specs << read_arg_spec!
         skip_spaces
+        if check /\.\.\.\]/
+          raise error_message ']' unless specs.size == 1
+          match /\.\.\.\]/
+          return ns::Array.new(specs.first)
+        end
       end while match /,/
       skip_spaces
       match /\]/ || (raise error_message :array_end)
