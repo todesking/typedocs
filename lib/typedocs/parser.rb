@@ -31,7 +31,7 @@ class Typedocs::Parser
     arg_specs = []
     block_spec = nil
 
-    arg_specs << read_arg_spec!
+    arg_specs << read_arg_spec_with_arg_type!
     skip_spaces
     while read_arrow
       skip_spaces
@@ -41,22 +41,40 @@ class Typedocs::Parser
         skip_spaces
         read_arrow!
         skip_spaces
-        arg_specs << read_arg_spec!
+        arg_specs << read_arg_spec_with_arg_type!
         skip_spaces
         break
       end
 
-      arg_specs << read_arg_spec!
+      arg_specs << read_arg_spec_with_arg_type!
 
       skip_spaces
     end
     skip_spaces
 
-    arg_specs = [Typedocs::ArgumentSpec::DontCare.new] if arg_specs.empty?
+    # TODO rm
+    arg_specs = [[:req, Typedocs::ArgumentSpec::DontCare.new]] if arg_specs.empty?
 
-    return Typedocs::MethodSpec::Single.new arg_specs[0..-2], block_spec, arg_specs[-1]
+    ret_spec = arg_specs.pop[1]
+
+    args_spec = Typedocs::ArgumentsSpec.new
+    arg_specs.each do|type, spec|
+      case type
+      when :req
+        args_spec.add_required(spec)
+      else
+        raise
+      end
+    end
+
+    return Typedocs::MethodSpec::Single.new args_spec, block_spec, ret_spec
   end
 
+  def read_arg_spec_with_arg_type!
+    [:req, read_arg_spec!]
+  end
+
+  # [arg_type:(:req|:opt|:res), spec]
   def read_arg_spec!
     # Currently, name is accepted but unused
     name = read_arg_spec_name

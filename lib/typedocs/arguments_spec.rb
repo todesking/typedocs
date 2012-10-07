@@ -17,6 +17,14 @@ class Typedocs::ArgumentsSpec
     matched = match(args)
     matched && matched.all? {|arg, spec| spec.valid? arg}
   end
+  def error_message_for(args)
+    matched = match(args)
+    errors = matched.select{|arg, spec|!spec.valid?(arg)}
+    "Expected: #{description}. Errors: #{errors.map{|arg,spec|spec.error_message_for(arg)}.join(' ||| ')}"
+  end
+  def description
+    @specs.map{|t,s|s}.flatten(1).map(&:description).join(' -> ')
+  end
   def add_required(arg_spec)
     _add :req, arg_spec
   end
@@ -29,6 +37,7 @@ class Typedocs::ArgumentsSpec
   private
   # args:[...] -> success:[[arg,spec]...] | fail:nil
   def match(args)
+    args = args.dup
     types = @specs.map{|t,s|t}
     case types
     when [:opt, :req]

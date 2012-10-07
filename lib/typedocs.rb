@@ -38,20 +38,16 @@ module Typedocs
     end
 
     class Single
-      # [Validator] -> Validator -> Validator ->
-      def initialize(args, block, ret)
-        @argument_specs = args
-        @block_spec = block
-        @retval_spec = ret
+      # ArgumentsSpec -> ArgumentSpec -> ArgumentSpec ->
+      def initialize(args_spec, block_spec, retval_spec)
+        @arguments_spec = args_spec
+        @block_spec = block_spec
+        @retval_spec = retval_spec
       end
 
-      attr_reader :argument_specs
+      attr_reader :arguments_spec
       attr_reader :block_spec
       attr_reader :retval_spec
-
-      def argument_size
-        argument_specs.size
-      end
 
       def call_with_validate(method, *args, &block)
         validate_args args
@@ -67,10 +63,7 @@ module Typedocs
       end
 
       def validate_args(args)
-        raise Typedocs::ArgumentError, "Argument size missmatch: expected #{argument_size} but #{args.size}" unless argument_size == args.size
-        argument_specs.zip(args).each do|spec, arg|
-          raise Typedocs::ArgumentError,spec.error_message_for(arg) unless spec.valid?(arg)
-        end
+        raise Typedocs::ArgumentError, arguments_spec.error_message_for(args) unless arguments_spec.valid?(args)
       end
 
       def validate_block(block)

@@ -114,14 +114,6 @@ describe Typedocs::Parser do
       end
     end
   end
-  describe 'parsing multiple validation' do
-    ['Integer ->', 'Integer -> Integer', '->Integer'].each do|src|
-      describe "'#{src}'" do
-        subject { parse(src) }
-        its(:argument_size) { should == 1 }
-      end
-    end
-  end
 end
 
 describe Typedocs::MethodSpec do
