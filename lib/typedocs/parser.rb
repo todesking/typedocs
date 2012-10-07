@@ -69,6 +69,10 @@ class Typedocs::Parser
     args_spec = Typedocs::ArgumentsSpec.new
     arg_specs.each do|type, spec|
       case type
+      when :opt
+        args_spec.add_optional(spec)
+      when :res
+        args_spec.add_rest(spec)
       when :req
         args_spec.add_required(spec)
       else
@@ -80,7 +84,13 @@ class Typedocs::Parser
   end
 
   def read_arg_spec_with_arg_type!
-    [:req, read_arg_spec!]
+    if match /\?/
+      [:opt, read_arg_spec!]
+    elsif match /\*/
+      [:res, read_arg_spec!]
+    else
+      [:req, read_arg_spec!]
+    end
   end
 
   # [arg_type:(:req|:opt|:res), spec]

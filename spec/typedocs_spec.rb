@@ -203,8 +203,14 @@ describe Typedocs::Parser do
       its_block_should_optional
       its_retval_should_accept nil
     end
-    when_parsing '*Integer -> Symbol' do
-      pending
+    when_parsing '*Integer -> nil' do
+      its_arguments_should_accept []
+      its_arguments_should_accept [1]
+      its_arguments_should_accept [1, 2]
+      its_arguments_should_not_accept [nil]
+
+      its_block_should_none
+      its_retval_should_accept nil
     end
   end
 end
