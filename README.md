@@ -79,9 +79,7 @@ end
 
 ## TODO
 
-    rename tdoc! to tdoc
     Method spec definitions:
-      remove empty notation for dont_care
       change array notation: [spec ...]
       hash value accepts unspecified keys: { :key => spec, ...}
 
