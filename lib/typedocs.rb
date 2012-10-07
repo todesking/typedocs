@@ -11,7 +11,7 @@ require "typedocs/arguments_spec"
 module Typedocs
   module MethodSpec
     class AnyOf
-      # [Single] ->
+      # [MethodSpec::Single] ->
       def initialize(specs)
         @specs = specs
       end

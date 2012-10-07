@@ -114,6 +114,66 @@ describe Typedocs::Parser do
       end
     end
   end
+  describe 'parsing complex arguments' do
+    def self.when_parsing(tdoc, &block)
+      describe "when parsing '#{tdoc}'", do
+        def self.about_arguments(&block)
+          describe('arguments') do
+            subject { method_spec.arguments_spec }
+            def self.valid(args)
+              it { should be_valid(args) }
+            end
+            def self.invalid(args)
+              it { should_not be_valid(args) }
+            end
+            self.instance_eval &block
+          end
+        end
+        def self.it_should_take_block_required
+          it('should take block(required)'){
+            method_spec.block_spec.should be_valid(lambda{})
+            method_spec.block_spec.should_not be_valid(nil)
+          }
+        end
+        def self.it_should_take_block_optional
+          it('should take block(optiona)'){
+            method_spec.block_spec.should_not be_valid(lambda{})
+            method_spec.block_spec.should be_valid(nil)
+          }
+        end
+        def self.it_should_not_take_blocks
+          it('should not take block'){
+            method_spec.block_spec.should_not be_valid(lambda{})
+            method_spec.block_spec.should be_valid(nil)
+          }
+        end
+        def self.about_retval
+          describe 'retval' do
+            subject { method_spec.retval_spec }
+            def self.valid(val)
+              it { should be_valid(val) }
+            end
+            def self.invalid(val)
+              it { should_not be_valid(val) }
+            end
+          end
+        end
+        let(:method_spec) { parse(tdoc) }
+        subject { method_spec }
+        self.instance_eval &block
+      end
+    end
+    when_parsing('Integer') do
+      about_arguments do
+        valid []
+        invalid [1]
+      end
+      about_retval do
+        valid 1
+        invalid nil
+      end
+    end
+  end
 end
 
 describe Typedocs::MethodSpec do
