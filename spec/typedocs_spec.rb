@@ -127,7 +127,7 @@ describe Typedocs::Parser do
           its_arguments_should_accept []
           its_arguments_should_not_accept [1]
         end
-        def self.its_block_is_required
+        def self.its_block_should_required
           its(:block_spec) {
             should be_valid(lambda{})
             should_not be_valid(nil)
@@ -193,11 +193,15 @@ describe Typedocs::Parser do
       its_retval_should_accept nil
       its_retval_should_not_accept :a
     end
-    when_parsing '& -> Symbol' do
-      pending
+    when_parsing '& -> nil' do
+      its_arguments_should_accept_empty_only
+      its_block_should_required
+      its_retval_should_accept nil
     end
-    when_parsing '?& -> Symbol' do
-      pending
+    when_parsing '?& -> nil' do
+      its_arguments_should_accept_empty_only
+      its_block_should_optional
+      its_retval_should_accept nil
     end
     when_parsing '*Integer -> Symbol' do
       pending
@@ -256,8 +260,8 @@ describe Typedocs::MethodSpec do
       it { ok(1,lambda{|i|i.to_s}) {|&block| block.call 1} }
       it { ng_block(1) {|&block| block.call 1} }
     end
-    describe 'Integer -> &? -> String' do
-      subject { parse 'Integer -> &? -> String' }
+    describe 'Integer -> ?& -> String' do
+      subject { parse 'Integer -> ?& -> String' }
       it { ok(1,lambda{|i|i.to_s}) {|&block| block.call 'a'} }
       it { ok(1) {|&block| 'a'} }
     end

@@ -29,28 +29,38 @@ class Typedocs::Parser
 
   def read_method_spec_single!
     arg_specs = []
-    block_spec = nil
 
-    arg_specs << read_arg_spec_with_arg_type!
-    skip_spaces
-    while read_arrow
+    block_spec = read_block_spec
+    if block_spec
       skip_spaces
-
-      block_spec = read_block_spec
-      if block_spec
-        skip_spaces
-        read_arrow!
-        skip_spaces
-        arg_specs << read_arg_spec_with_arg_type!
-        skip_spaces
-        break
-      end
-
+      read_arrow!
+      skip_spaces
       arg_specs << read_arg_spec_with_arg_type!
-
       skip_spaces
     end
-    skip_spaces
+
+    unless block_spec
+      arg_specs << read_arg_spec_with_arg_type!
+      skip_spaces
+      while read_arrow
+        skip_spaces
+
+        block_spec = read_block_spec
+        if block_spec
+          skip_spaces
+          read_arrow!
+          skip_spaces
+          arg_specs << read_arg_spec_with_arg_type!
+          skip_spaces
+          break
+        end
+
+        arg_specs << read_arg_spec_with_arg_type!
+
+        skip_spaces
+      end
+      skip_spaces
+    end
 
     block_spec ||= Typedocs::ArgumentSpec::Nil.new
 
@@ -153,7 +163,7 @@ class Typedocs::Parser
 
   def read_block_spec
     ns = Typedocs::ArgumentSpec
-    if match /&\?/
+    if match /\?&/
       ns::Or.new([
         ns::TypeIsA.new(@klass, '::Proc'),
         ns::Nil.new,
