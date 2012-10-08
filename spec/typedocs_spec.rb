@@ -70,11 +70,6 @@ describe Typedocs::Parser do
       it { should_not be_valid(['a']) }
     end
     describe 'Hash' do
-      describe 'empty' do
-        subject { spec_for '{}' }
-        it { should be_valid({}) }
-        it { should_not be_valid({1 => 2}) }
-      end
       describe 'hash_value' do
         subject { spec_for '{:sym => Integer, "str" => String, \'str2\' => Symbol}' }
         it { should be_valid({sym: 10, "str" => "string", "str2" => :a}) }
@@ -224,6 +219,11 @@ describe Typedocs::Parser do
       its_arguments_should_accept [[]]
       its_arguments_should_accept [[1,2,3]]
       its_arguments_should_not_accept [[nil]]
+    end
+    when_parsing '{ :i => Integer, ...} -> nil' do
+      its_arguments_should_accept [{i: 1}]
+      its_arguments_should_accept [{i: 1, j: 2}]
+      its_arguments_should_not_accept [{}]
     end
   end
 end
@@ -375,12 +375,22 @@ describe Typedocs::ArgumentSpec do
     its(:description) { should == 'Integer...' }
   end
   describe '::HashValue' do
-    subject { ns::HashValue.new([[:foo, ns::TypeIsA.new(Object, 'Integer')], ['bar', ns::Nil.new]]) }
-    it { should be_valid({foo: 1, 'bar' => nil}) }
-    it { should_not be_valid({}) }
-    it { should_not be_valid({foo: 1}) }
-    it { should_not be_valid({foo: 1, 'bar' => nil, baz: 99}) }
-    its(:description) { should == '{:foo => Integer, "bar" => nil}' }
+    describe 'not accept others' do
+      subject { ns::HashValue.new([[:foo, ns::TypeIsA.new(Object, 'Integer')], ['bar', ns::Nil.new]], false) }
+      it { should be_valid({foo: 1, 'bar' => nil}) }
+      it { should_not be_valid({}) }
+      it { should_not be_valid({foo: 1}) }
+      it { should_not be_valid({foo: 1, 'bar' => nil, baz: 99}) }
+      its(:description) { should == '{:foo => Integer, "bar" => nil}' }
+    end
+    describe 'accept others' do
+      subject { ns::HashValue.new([[:foo, ns::TypeIsA.new(Object, 'Integer')], ['bar', ns::Nil.new]], true) }
+      it { should be_valid({foo: 1, 'bar' => nil}) }
+      it { should_not be_valid({}) }
+      it { should_not be_valid({foo: 1}) }
+      it { should be_valid({foo: 1, 'bar' => nil, baz: 99}) }
+      its(:description) { should == '{:foo => Integer, "bar" => nil, ...}' }
+    end
   end
   describe '::HashType' do
     subject { ns::HashType.new(ns::TypeIsA.new(Object, 'Integer'), ns::TypeIsA.new(Object, 'String')) }

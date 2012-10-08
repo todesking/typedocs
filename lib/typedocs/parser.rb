@@ -155,8 +155,6 @@ class Typedocs::Parser
       entries = []
       if check /['":]/
         ret = read_hash_value!
-      elsif check /}/
-        ret = ns::HashValue.new([])
       else
         ret = read_hash_type!
       end
@@ -195,13 +193,19 @@ class Typedocs::Parser
 
   def read_hash_value!
     entries = []
+    accept_others = false
     begin
       skip_spaces
+      if match /\.\.\./
+        accept_others = true
+        break
+      end
       break if check /}/
       entries << read_hash_entry!
       skip_spaces
     end while match /,/
-    Typedocs::ArgumentSpec::HashValue.new(entries)
+    skip_spaces
+    Typedocs::ArgumentSpec::HashValue.new(entries, accept_others)
   end
 
   def read_hash_entry!

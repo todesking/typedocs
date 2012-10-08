@@ -112,16 +112,17 @@ class Typedocs::ArgumentSpec
   end
   class HashValue < self
     # [key, spec]... ->
-    def initialize(entries)
+    def initialize(entries, accept_others)
       @entries = entries
+      @accept_others = accept_others
     end
     def valid?(obj)
       obj.is_a?(::Hash) &&
-      @entries.size == obj.size &&
+      (@accept_others || @entries.size == obj.size) &&
       @entries.all? {|key, spec| obj.has_key?(key) && spec.valid?(obj[key]) }
     end
     def description
-      "{#{@entries.map{|key,value| "#{key.inspect} => #{value.description}"}.join(', ')}}"
+      "{#{@entries.map{|key,value| "#{key.inspect} => #{value.description}"}.join(', ')}#{@accept_others ? ', ...' : ''}}"
     end
   end
   class HashType < self
