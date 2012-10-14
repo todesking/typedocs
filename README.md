@@ -96,7 +96,6 @@ end
       foo 1,2,skip_validation('3')
     Exception spec
     Informative error message
-    Method override(inherit)
     Enable/Disable for specific class
     get typedoc from method
     Name to complex data structure

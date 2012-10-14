@@ -9,6 +9,8 @@ require "typedocs/argument_spec"
 require "typedocs/arguments_spec"
 
 module Typedocs
+  @@method_specs = {}
+
   module MethodSpec
     class AnyOf
       # [MethodSpec::Single] ->
@@ -77,6 +79,28 @@ module Typedocs
         raise Typedocs::RetValError, retval_spec.error_message_for(ret) unless retval_spec.valid?(ret)
       end
     end
+  end
+
+  def self.super_method_spec(klass, name)
+    while klass = klass.superclass
+      spec = method_spec(klass, name)
+      return spec if spec
+    end
+    nil
+  end
+
+  def self.method_spec(klass, name)
+    @@method_specs[[klass, name]]
+  end
+
+  def self.define_spec(klass, name, method_spec)
+    klass.instance_eval do
+      original_method = instance_method(name)
+      define_method name do|*args,&block|
+        method_spec.call_with_validate original_method.bind(self), *args, &block
+      end
+    end
+    @@method_specs[[klass, name]] = method_spec
   end
 
   class ArgumentError < ::ArgumentError; end

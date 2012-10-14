@@ -527,3 +527,54 @@ describe Typedocs::ArgumentsSpec do
   describe 'with (a, *b, *c)' # error
   describe 'with (a, *b, ?c)' # error
 end
+
+describe 'tdoc :inherit' do
+  before do
+    @ns = Class.new
+  end
+  describe 'A < B' do
+    before do
+      class @ns::A
+        include Typedocs::DSL
+        tdoc 'Integer'
+        def foo; '1'; end
+      end
+      class @ns::B < @ns::A
+        include Typedocs::DSL
+        tdoc :inherit
+        def foo; '2'; end
+      end
+    end
+    it 'inherit super method spec' do
+      expect { @ns::A.new.foo }.to raise_error Typedocs::RetValError
+      expect { @ns::B.new.foo }.to raise_error Typedocs::RetValError
+    end
+  end
+  describe 'deep nested class' do
+    before do
+      module @ns::Module
+        def foo; end
+      end
+      class @ns::A
+        include Typedocs::DSL
+        tdoc 'Integer'
+        def foo; end
+      end
+      class @ns::X < @ns::A
+      end
+      class @ns::B < @ns::X
+        include Typedocs::DSL
+      end
+      ns = @ns
+      @ns::B.class_eval { include(ns::Module) }
+      class @ns::B < @ns::X
+        def self.foo; end
+        tdoc :inherit
+        def foo; end
+      end
+    end
+    it 'inherit super method spec' do
+      expect { @ns::B.new.foo }.to raise_error Typedocs::RetValError
+    end
+  end
+end

@@ -14,33 +14,34 @@ module Typedocs::DSL
   end
 
   def self.included(klass)
+    # doc:String | special:(:inherit) | nil
     @typedocs_current_def = nil
 
     if Typedocs::DSL.enabled?
       class << klass
-        def tdoc(doc_str)
-          @typedocs_current_def = ::Typedocs::DSL.parse self, doc_str
+        def tdoc(arg)
+          @typedocs_current_def = arg
         end
 
         def method_added(name)
           super
           return unless @typedocs_current_def
 
-          current_def = @typedocs_current_def
+          method_spec = ::Typedocs::DSL.method_spec(self, name, @typedocs_current_def)
           @typedocs_current_def = nil
 
-          ::Typedocs::DSL.decorate self, name, current_def
+          ::Typedocs.define_spec self, name, method_spec
         end
 
         def singleton_method_added(name)
           super
           return unless @typedocs_current_def
 
-          current_def = @typedocs_current_def
+          method_spec = ::Typedocs::DSL.method_spec(self, name, @typedocs_current_def)
           @typedocs_current_def = nil
 
           singleton_class = class << self; self; end
-          ::Typedocs::DSL.decorate singleton_class, name, current_def
+          ::Typedocs.define_spec singleton_class, name, method_spec
         end
       end
     else
@@ -50,18 +51,14 @@ module Typedocs::DSL
     end
   end
 
-  def self.parse klass, doc
-    Typedocs::Parser.new(klass, doc).parse
-  end
-
-  def self.decorate(klass, name, tdoc_def)
-    return unless tdoc_def
-
-    klass.instance_eval do
-      original_method = instance_method(name)
-      define_method name do|*args,&block|
-        tdoc_def.call_with_validate original_method.bind(self), *args, &block
-      end
+  def self.method_spec(klass, name, tdoc_arg)
+    case tdoc_arg
+    when String
+      Typedocs::Parser.new(klass, tdoc_arg).parse
+    when :inherit
+      Typedocs.super_method_spec(klass, name) || (raise "can't find typedoc for super method: #{klass}##{name}")
+    else
+      raise "Unsupported document: #{tdoc_arg.inspect}"
     end
   end
 end
