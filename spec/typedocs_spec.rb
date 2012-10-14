@@ -111,7 +111,7 @@ describe Typedocs::Parser do
   end
   describe 'parsing complex arguments' do
     def self.when_parsing(tdoc, &block)
-      describe "when parsing '#{tdoc}'", do
+      describe "when parsing '#{tdoc}'" do
         def self.its_arguments_should_accept(args)
           it { method_spec.arguments_spec.should be_valid(args) }
         end
