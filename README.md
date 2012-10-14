@@ -62,7 +62,7 @@ end
     type               = Class or Module name
     array              = '[' arg_spec '...]'
     array_as_struct    = '[' arg_spec (',' arg_spec)* ']'
-    hash_value         = '{' hash_element (',' hash_element)* '}'
+    hash_value         = '{' hash_element (',' hash_element)* ',...'? '}'
     hash_element       = hash_key '=>' arg_spec
     hash_type          = '{' arg_spec '=>' arg_spec '}'
     hash_key           = 'String' | "String" | :Symbol
@@ -96,10 +96,14 @@ end
       foo 1,2,skip_validation('3')
     Exception spec
     Informative error message
-    Method override
+    Method override(inherit)
+    Enable/Disable for specific class
+    get typedoc from method
+    Name to complex data structure
     Self hosting
     Re-define existing method's spec
     Auto spec inference(from argument name)
+    define from outer
     attr_accessor
 
 
