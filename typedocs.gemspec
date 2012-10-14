@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Typedocs::VERSION
 
-  gem.add_development_dependency 'rspec'
-  gem.add_development_dependency 'simplecov'
-  gem.add_development_dependency 'simplecov-vim'
+  %w(rspec simplecov simplecov-vim).each do|dep|
+    gem.add_development_dependency dep
+  end
 end
