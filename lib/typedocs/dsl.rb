@@ -27,7 +27,7 @@ module Typedocs::DSL
           super
           return unless @typedocs_current_def
 
-          method_spec = ::Typedocs::DSL.method_spec(self, name, @typedocs_current_def)
+          method_spec = ::Typedocs.create_method_spec(self, name, @typedocs_current_def)
           @typedocs_current_def = nil
 
           ::Typedocs.define_spec self, name, method_spec
@@ -37,7 +37,7 @@ module Typedocs::DSL
           super
           return unless @typedocs_current_def
 
-          method_spec = ::Typedocs::DSL.method_spec(self, name, @typedocs_current_def)
+          method_spec = ::Typedocs.create_method_spec(self, name, @typedocs_current_def)
           @typedocs_current_def = nil
 
           singleton_class = class << self; self; end
@@ -48,17 +48,6 @@ module Typedocs::DSL
       class << klass
         def tdoc(doc_str); end
       end
-    end
-  end
-
-  def self.method_spec(klass, name, tdoc_arg)
-    case tdoc_arg
-    when String
-      Typedocs::Parser.new(klass, tdoc_arg).parse
-    when :inherit
-      Typedocs.super_method_spec(klass, name) || (raise "can't find typedoc for super method: #{klass}##{name}")
-    else
-      raise "Unsupported document: #{tdoc_arg.inspect}"
     end
   end
 end

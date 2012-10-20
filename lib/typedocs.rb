@@ -81,6 +81,7 @@ module Typedocs
     end
   end
 
+  # MethodSpec | nil
   def self.super_method_spec(klass, name)
     while klass = klass.superclass
       spec = method_spec(klass, name)
@@ -103,7 +104,20 @@ module Typedocs
     @@method_specs[[klass, name]] = method_spec
   end
 
+  def self.create_method_spec(klass, name, tdoc_arg)
+    case tdoc_arg
+    when String
+      Typedocs::Parser.new(klass, tdoc_arg).parse
+    when :inherit
+      Typedocs.super_method_spec(klass, name) || (raise NoSuchMethod, "can't find typedoc for super method: #{klass}##{name}")
+    else
+      raise "Unsupported document: #{tdoc_arg.inspect}"
+    end
+  end
+
   class ArgumentError < ::ArgumentError; end
   class RetValError < ::StandardError; end
   class BlockError < ::StandardError; end
+
+  class NoSuchMethod < ::StandardError; end
 end

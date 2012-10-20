@@ -577,4 +577,22 @@ describe 'tdoc :inherit' do
       expect { @ns::B.new.foo }.to raise_error Typedocs::RetValError
     end
   end
+  describe 'class method' do
+    before do
+      class @ns::A
+        include Typedocs::DSL
+        tdoc 'Integer'
+        def self.foo; end
+      end
+    end
+    it 'cant inherit' do
+      expect {
+        class @ns::B < @ns::A
+          include Typedocs::DSL
+          tdoc :inherit
+          def self.foo; end
+        end
+      }.to raise_error Typedocs::NoSuchMethod
+    end
+  end
 end
