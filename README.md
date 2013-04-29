@@ -32,7 +32,7 @@ Some of features is not implemented.
 class X
   include Typedocs::DSL
 
-  tdoc!"Numeric -> Numeric"
+  tdoc "Numeric -> Numeric"
   def square x
     x * x
   end
@@ -48,7 +48,7 @@ Typedocs::DSL.do_nothing
 class X
   include Typedocs::DSL
 
-  tdoc!"This text is ignored when Typedocs disabled"
+  tdoc "This text is ignored when Typedocs disabled"
 end
 ```
 
