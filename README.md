@@ -2,6 +2,8 @@
 
 The goal of the project is to provide user-friendly type annotations for Ruby.
 
+NOTICE: This gem is very veta, any APIs/syntaxes may change in future.
+
 ## Platform
 
 Ruby 1.9
@@ -68,6 +70,26 @@ end
     hash_key           = 'String' | "String" | :Symbol
     any                = '*'
     dont_care          = '' | '--'
+
+### Fallbacks
+
+```
+# in your gem dir
+$ typedocs install-fallback lib
+```
+
+and
+
+```ruby
+require 'typedocs/fallback' # instead of `require 'typedocs'`
+
+class A
+  include Typedocs::DSL
+  # ...
+end
+```
+
+With that, your library works without typedocs dependency.
 
 ## Contributing
 
