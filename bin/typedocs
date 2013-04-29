@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+exit ({
+  'install-fallback' => ->(args) do
+    require 'optparse'
+    require 'fileutils'
+
+    opts={}
+    parser = OptionParser.new
+    parser.on('--help') { opts[:help] = true }
+    args = parser.parse(args)
+    usage_message = <<-EOS
+USAGE: #$0 install-fallback <dir>
+  Install typedocs fallback to <dir> for decouple library from typedocs gem.
+
+  To use it, require 'typedocs/fallback' instead of require 'typedocs'.
+    EOS
+
+    if opts[:help]
+      $stdout.puts usage_message
+      return 0
+    end
+    unless args.size == 1
+      $stderr.puts usage_message
+      return 1
+    end
+
+    dest_dir = args.first
+
+    fallback = File.join(File.dirname(__FILE__), '..', 'fallback', 'fallback.rb')
+    fallback_root = File.join(dest_dir, 'typedocs')
+
+    FileUtils.mkdir_p(fallback_root)
+    FileUtils.cp(fallback, fallback_root)
+
+    $stdout.puts "Fallback is installed to #{fallback_root}"
+
+    return 0
+  end,
+}[ARGV[0]]||->(args) do
+  $stderr.puts <<-EOS
+USAGE: #$0 <command> <command-args>
+  command:
+    - install-fallback
+  EOS
+  return 1
+end)[ARGV[1..-1]]
