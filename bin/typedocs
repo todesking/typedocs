@@ -27,11 +27,17 @@ USAGE: #$0 install-fallback <dir>
 
     dest_dir = args.first
 
-    fallback = File.join(File.dirname(__FILE__), '..', 'fallback', 'fallback.rb')
+    fallback      = File.join(File.dirname(__FILE__), '..', 'lib', 'typedocs', 'fallback.rb')
+    fallback_impl = File.join(File.dirname(__FILE__), '..', 'lib', 'typedocs', 'fallback')
     fallback_root = File.join(dest_dir, 'typedocs')
 
+    if File.exists?(fallback_root)
+      $stderr.puts "Fallback is already installed in #{fallback_root}"
+      return 1
+    end
     FileUtils.mkdir_p(fallback_root)
-    FileUtils.cp(fallback, fallback_root)
+    FileUtils.cp(fallback        , fallback_root)
+    FileUtils.cp_r(fallback_impl , fallback_root)
 
     $stdout.puts "Fallback is installed to #{fallback_root}"
 
