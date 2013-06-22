@@ -151,5 +151,17 @@ class Typedocs::ArgumentSpec
       "#{@children.map(&:description).join('|')}"
     end
   end
+  class UserDefinedType < self
+    def initialize(klass, name, source)
+      @name = name
+      @spec = Typedocs::Parser.new(klass, source).read_arg_spec!
+    end
+    def valid?(arg)
+      @spec.valid?(arg)
+    end
+    def description
+      "#{@name} = #{@spec.description}"
+    end
+  end
 end
 

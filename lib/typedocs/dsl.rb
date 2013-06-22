@@ -19,8 +19,14 @@ module Typedocs::DSL
 
     if Typedocs::DSL.enabled?
       class << klass
-        def tdoc(arg)
-          @typedocs_current_def = arg
+        def tdoc(*args)
+          if args.size == 1 && args[0].is_a?(String) || args[0].is_a?(Symbol)
+            @typedocs_current_def = args[0]
+          elsif args.size == 0
+            Typedocs::MultiFunctionalInterface.new(self)
+          else
+            raise ArgumentError
+          end
         end
 
         def method_added(name)

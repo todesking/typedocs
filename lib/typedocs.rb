@@ -7,9 +7,12 @@ require "typedocs/dsl"
 require "typedocs/parser"
 require "typedocs/argument_spec"
 require "typedocs/arguments_spec"
+require "typedocs/multi_functional_interface"
+require "typedocs/context"
 
 module Typedocs
   @@method_specs = {}
+  @@contexts = {}
 
   module MethodSpec
     class AnyOf
@@ -113,6 +116,10 @@ module Typedocs
     else
       raise "Unsupported document: #{tdoc_arg.inspect}"
     end
+  end
+
+  def self.context(klass)
+    @@contexts[klass] ||= Context.new(klass)
   end
 
   class ArgumentError < ::ArgumentError; end

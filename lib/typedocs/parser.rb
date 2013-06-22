@@ -93,6 +93,7 @@ class Typedocs::Parser
     end
   end
 
+  public
   # [arg_type:(:req|:opt|:res), spec]
   def read_arg_spec!
     # Currently, name is accepted but unused
@@ -117,6 +118,7 @@ class Typedocs::Parser
     end
     return Typedocs::ArgumentSpec::Or.new(ret)
   end
+  private
 
   def read_arg_spec_name
     if match /[A-Za-z_0-9]+:/
@@ -128,8 +130,12 @@ class Typedocs::Parser
 
   def read_simple_arg_spec!
     ns = ::Typedocs::ArgumentSpec
-    if match /(::)?[A-Z]\w*(::[A-Z]\w*)*/
-      ns::TypeIsA.new(@klass, matched.strip)
+    if match /@?(::)?[A-Z]\w*(::[A-Z]\w*)*/
+      if matched =~ /^@/
+        Typedocs.context(@klass).defined_type(matched.strip)
+      else
+        ns::TypeIsA.new(@klass, matched.strip)
+      end
     elsif match /_/
       ns::Any.new
     elsif check /->/ or match /--/ or check /\|\|/ or eos?
