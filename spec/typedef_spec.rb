@@ -7,6 +7,7 @@ describe 'Typedocs.typedef' do
   end
   after(:each) do
     Object.instance_eval { remove_const :TypedocsSpecSandbox }
+    Typedocs.initialize!
   end
   describe 'spec itself' do
     it('Object::TypeDocsSpecSandBox exists') do
@@ -41,6 +42,32 @@ describe 'Typedocs.typedef' do
         }
         klass.new.legal.should == {hoge: 10}
         expect { klass.new.illegal }.to raise_error Typedocs::RetValError
+      end
+      it 'should referable from inner type' do
+        expect {
+          class @ns::B
+            include Typedocs::DSL
+            tdoc "@ConfigHash"
+            def illegal; {}; end
+          end
+        }.to raise_error Typedocs::NoSuchType
+      end
+      it 'should not referable from other type' do
+        class klass::InnerType
+          include Typedocs::DSL
+          tdoc "@ConfigHash"
+          def illegal; {}; end
+        end
+        expect { klass::InnerType.new.illegal }.to raise_error Typedocs::RetValError
+      end
+      it 'should not referable from inherited type' do
+        expect {
+          class @ns::C < klass
+            include Typedocs::DSL
+            tdoc "@ConfigHash"
+            def illegal; {}; end
+          end
+        }.to raise_error Typedocs::NoSuchType
       end
     end
   end

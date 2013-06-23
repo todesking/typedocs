@@ -11,8 +11,11 @@ require "typedocs/multi_functional_interface"
 require "typedocs/context"
 
 module Typedocs
-  @@method_specs = {}
-  @@contexts = {}
+  def self.initialize!
+    @@method_specs = {}
+    @@contexts = {}
+  end
+  initialize!
 
   module MethodSpec
     class AnyOf
@@ -127,4 +130,5 @@ module Typedocs
   class BlockError < ::StandardError; end
 
   class NoSuchMethod < ::StandardError; end
+  class NoSuchType < ::StandardError; end
 end

@@ -132,7 +132,7 @@ class Typedocs::Parser
     ns = ::Typedocs::ArgumentSpec
     if match /@?(::)?[A-Z]\w*(::[A-Z]\w*)*/
       if matched =~ /^@/
-        Typedocs.context(@klass).defined_type(matched.strip)
+        Typedocs.context(@klass).defined_type!(matched.strip)
       else
         ns::TypeIsA.new(@klass, matched.strip)
       end
