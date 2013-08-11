@@ -1,6 +1,6 @@
 require 'parslet'
 
-class Typedocs::Parser::Parser < Parslet::Parser
+class Typedocs::Parser::ASTBuilder < Parslet::Parser
   root :method_spec
 
   rule(:method_spec) { spaces >> rep1(method_spec1, s('||')) }

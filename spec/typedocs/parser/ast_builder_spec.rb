@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Typedocs::Parser::Parser do
+describe Typedocs::Parser::ASTBuilder do
   describe 'type' do
     subject { super().type }
     it { should parse 'TypeName' }
