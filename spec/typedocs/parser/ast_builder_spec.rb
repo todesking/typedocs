@@ -26,23 +26,31 @@ describe Typedocs::Parser::ASTBuilder do
 
   describe 'arg_spec' do
     subject { super().arg_spec }
-    it { should parse 'name' }
-    it { should parse 'name:String' }
-    it { should parse 'name:String|nil' }
-    it { should parse 'data:{key:String => value:String}' }
-    it { should parse 'Integer' }
+    def v_h(val)
+      {value: val}
+    end
+    def type_name_h(name)
+      {type_name: v_h(name) }
+    end
+    it { should parse('name').as(name: v_h('name')) }
+    it { should parse('name:String').as(name: v_h('name'), type: type_name_h('String')) }
+    it { should parse('name:String|nil') }
+    it { should parse('data:{key:String => value:String}') }
+    it { should parse('Integer').as(type: type_name_h('Integer')) }
   end
 
   describe 'method_spec' do
     subject { super().method_spec }
-    it { should parse '' }
-    it { should parse 'Integer' }
-    it { should parse '_ -> _' }
-    it { should parse '_ ->' }
-    it { should parse 'a -> b -> & ->' }
-    it { should parse 'a -> b -> ?& ->' }
-    it { should parse 'a -> b -> &callback ->' }
-    it { should parse '_ -> Integer || Integer' }
-    it { should parse '_ -> _ || _ ->' }
+    let(:empty_arg_spec) { {arg_specs: [], block_spec: nil, return_spec: nil} }
+    it { should parse('').as(method_spec1: empty_arg_spec) }
+    it { should parse('Integer').as(method_spec1: {arg_specs: [], block_spec: nil, return_spec: {type: {type_name: {value: 'Integer'}}}}) }
+    it { should parse('_ -> _') }
+    it { should parse('_ ->') }
+    it { should parse('a -> b -> & ->') }
+    it { should parse('a -> b -> ?& ->') }
+    it { should parse('a -> b -> &callback ->') }
+    it { should parse('_ -> Integer || Integer') }
+    it { should parse('_ -> _ || _ ->') }
+    it { should parse('||').as(method_spec1: [empty_arg_spec, empty_arg_spec]) }
   end
 end
