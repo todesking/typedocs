@@ -3,7 +3,7 @@ require 'parslet'
 class Typedocs::Parser::Parser < Parslet::Parser
   root :method_spec
 
-  rule(:method_spec) { spaces >> method_spec1 >> (s('||') >> method_spec1).repeat }
+  rule(:method_spec) { spaces >> rep1(method_spec1, s('||')) }
   rule(:method_spec1) { (arg_spec >> s('->')).repeat >> (block_spec >> s('->')).maybe >> return_spec.maybe }
 
   rule(:arg_spec) {  type | arg_name >> (s(':') >> type).maybe }
@@ -13,7 +13,7 @@ class Typedocs::Parser::Parser < Parslet::Parser
 
   rule(:return_spec) { arg_spec }
 
-  rule(:type) { (type1 >> s('|') >> s('|').absent?).repeat >> type1 }
+  rule(:type) { rep1(type1, s('|') >> s('|').absent?) }
   rule(:type1) {
     type_name | defined_type_name | special | array | tuple | hash | value
   }
@@ -26,7 +26,7 @@ class Typedocs::Parser::Parser < Parslet::Parser
   rule(:void) { s('void') }
 
   rule(:array) { s('[') >> arg_spec >> s(',') >> s('...') >> s(']') }
-  rule(:tuple) { s('[') >> (arg_spec >> s(',')).repeat(1) >> arg_spec >> s(']') }
+  rule(:tuple) { s('[') >> rep1(arg_spec, s(',')) >> s(']') }
 
   rule(:hash) { hash_with_type | hash_with_value }
   rule(:hash_with_type) { s('{') >> arg_spec >> s('=>') >> arg_spec >> s('}') }
@@ -43,5 +43,9 @@ class Typedocs::Parser::Parser < Parslet::Parser
   private
     def s(string)
       str(string) >> spaces
+    end
+
+    def rep1(rule, separator)
+      rule >> (separator >> rule).repeat
     end
 end
