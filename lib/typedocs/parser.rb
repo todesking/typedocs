@@ -1,6 +1,7 @@
 class Typedocs::Parser; end
 
 require 'typedocs/parser/ast_builder'
+require 'typedocs/parser/object_builder'
 
 class Typedocs::Parser
   def initialize klass, src
