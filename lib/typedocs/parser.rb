@@ -1,3 +1,7 @@
+class Typedocs::Parser; end
+
+require 'typedocs/parser/parser'
+
 class Typedocs::Parser
   def initialize klass, src
     @klass = klass
