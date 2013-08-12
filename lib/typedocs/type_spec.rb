@@ -5,10 +5,12 @@ class Typedocs::TypeSpec
 
   class Named < self
     def initialize(name, spec)
+      Typedocs.ensure_klass(spec, Typedocs::TypeSpec)
       @name = name
       @spec = spec
     end
     attr_reader :name
+    attr_reader :spec
     def valid?(arg); spec.valid?(arg); end
     def to_source; "#{name}:#{spec.to_source}"; end
     def error_message_for(arg)

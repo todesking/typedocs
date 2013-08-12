@@ -21,12 +21,18 @@ class Typedocs::Parser::ObjectBuilder
       h = Helper
       dc = subtree(:_) # dont care
       dc2 = subtree(:__)
-      mktype = ->(t) {
-        case t
-        when Array
-          ts::Or.new(t)
+      mktype = ->(t, name) {
+        unnamed =
+          case t
+          when Array
+            ts::Or.new(t)
+          else
+            t || ts::Any.new
+          end
+        if name
+          ts::Named.new(name, unnamed)
         else
-          t
+          unnamed
         end
       }
 
@@ -48,12 +54,14 @@ class Typedocs::Parser::ObjectBuilder
           end
           return_spec = tree[:return_spec] || Typedocs::TypeSpec::Any.new
           block_spec =
-            if !tree[:block_spec]
-              Typedocs::BlockSpec.new(:none)
-            elsif tree[:block_spec][:attr] == '?'
-              Typedocs::BlockSpec.new(:opt)
-            else
-              Typedocs::BlockSpec.new(:req)
+            tree[:block_spec].tap do|bs|
+              break Typedocs::BlockSpec.new(:none, nil) if !bs
+              name = bs[:name] ? bs[:name][:value] : nil
+              if bs[:attr] == '?'
+                break Typedocs::BlockSpec.new(:opt, name)
+              else
+                break Typedocs::BlockSpec.new(:req, name)
+              end
             end
           Typedocs::MethodSpec::Single.new(args_spec, block_spec, return_spec)
         }
@@ -65,11 +73,11 @@ class Typedocs::Parser::ObjectBuilder
       }
 
       # arg
-      rule(type: subtree(:t), attr: simple(:attr)) { {t: mktype[t], a: attr} }
-      rule(type: subtree(:t), name: dc, attr: simple(:attr)) { {t: mktype[t], a: attr} }
+      rule(type: subtree(:t), attr: simple(:attr)) { {t: mktype[t, nil], a: attr} }
+      rule(type: subtree(:t), name: {value: simple(:name)}, attr: simple(:attr)) { {t: mktype[t, name], a: attr} }
       # return
-      rule(type: subtree(:t)) { mktype[t] }
-      rule(type: subtree(:t), name: dc) { mktype[t] }
+      rule(type: subtree(:t)) { mktype[t, nil] }
+      rule(type: subtree(:t), name: {value: simple(:name)}) { mktype[t, name] }
 
       rule(type_name: val) { ts::TypeIsA.new(klass, v.to_s) }
       rule(defined_type_name: val) { ts::UserDefinedType.new(klass, "@#{v.to_s}") }

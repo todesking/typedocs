@@ -1,8 +1,11 @@
 module Typedocs
   class BlockSpec
-    def initialize(type)
+    def initialize(type, name)
+      raise ArgumentError unless [:req, :opt, :none].include?(type)
+      @name = name
       @type = type
     end
+    attr_reader :name
     def valid?(block)
       case block
       when nil
@@ -25,11 +28,12 @@ module Typedocs
       end
     end
     def to_source
+      n = name
       case @type
       when :req
-        '&'
+        "&#{n}"
       when :opt
-        '?&'
+        "?&#{n}"
       when :none
         ''
       else

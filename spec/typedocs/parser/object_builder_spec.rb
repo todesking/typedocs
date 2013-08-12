@@ -34,10 +34,10 @@ describe Typedocs::Parser::ObjectBuilder do
 
   describe 'transform root' do
     it { td(:root, 'A|B', 'A|B') }
-    it { td(:root, 'name:String', 'String') }
-    it { td(:root, 'a -> b', '_ -> _') }
-    it { td(:root, 'x:A->ret:B || a:A -> b:B -> ret:C', 'A -> B || A -> B -> C') }
-    it { td(:root, 'x:X -> ?y -> *Z ->', 'X -> ?_ -> *Z -> _') }
-    it { td(:root, 'a -> ?&b ->', '_ -> ?& -> _') }
+    it { td(:root, 'name:String', 'name:String') }
+    it { td(:root, 'a -> b', 'a:_ -> b:_') }
+    it { td(:root, 'x:A->ret:B || a:A -> b:B -> ret:C', 'x:A -> ret:B || a:A -> b:B -> ret:C') }
+    it { td(:root, 'x:X -> ?y -> *Z ->', 'x:X -> ?y:_ -> *Z -> _') }
+    it { td(:root, 'a -> ?&b ->', 'a:_ -> ?&b -> _') }
   end
 end
