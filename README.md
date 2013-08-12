@@ -6,27 +6,11 @@ NOTICE: This gem is very veta, any APIs/syntaxes may change in future.
 
 ## Platform
 
-Ruby 1.9
-
-## Installation
-
-Add this line to your application's Gemfile:
-
-    gem 'typedocs'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
-    $ gem install typedocs
+Ruby 1.9/2.0
 
 ## Usage
 
 ### Method type annotations
-
-Some of features is not implemented.
 
 ```ruby
 class X
@@ -52,7 +36,30 @@ class X
 end
 ```
 
-### Type definition
+### Example
+```ruby
+class Example
+  include Typedocs::DSL
+
+  tdoc "String"
+  def to_s; end
+
+  tdoc "Integer -> String|nil"
+  def [](index); end
+
+  tdoc "& -> Array || Enumerable"
+  def map; end
+
+  tdoc "[[key:Integer, value:String]...]"
+  def to_a; end
+
+  tdoc "title:String -> url:String|Hash -> ?options:Hash -> String ||
+        url:String|Hash -> ?options:Hash -> &content -> String"
+  def link_to(*args); end
+end
+```
+
+### User Defined Types
 
 ```ruby
 class SomethingBuilder
@@ -65,6 +72,47 @@ class SomethingBuilder
   tdoc "@ConfigHash -> SomeContext -> Something"
   def build_with_context(config, context); end
 end
+```
+
+### Features
+
+```
+syntax: arg1_name:Type1 -> arg2_name:Type2 -> &block -> ResultType
+
+# Type name
+TypeName
+
+# User defined type name
+@TypeName
+
+# Exact value(symbol, string)
+:a
+'a'
+"a"
+
+# Special matchers
+_     # Any object
+void  # The value is not used. Typically for return type.
+      # If return type is omitted, treated as void.
+
+# Data structure
+[Type...]   # Array of Type
+[T1, T2]    # Fixed number array(tuple)
+{K => V}    # Hash specified by key type and value type
+{:key1 => V1, "key2" => V2}
+            # Hash specified by possible key value and value type
+{:key1 => V1, "Key2" => V2, ...}
+            # Same as above, but may contains unspecified key-value pair
+
+# Selection
+A|B  # A or B
+
+# Qualifier
+*var_arg
+?optional_arg
+
+&block
+?&optional_block
 ```
 
 ### Grammer
@@ -120,6 +168,21 @@ end
 ```
 
 With that, your library works without typedocs dependency.
+When typedocs gem not found, `tdoc` method do nothing.
+
+## Installation
+
+Add this line to your application's Gemfile:
+
+    gem 'typedocs'
+
+And then execute:
+
+    $ bundle
+
+Or install it yourself as:
+
+    $ gem install typedocs
 
 ## Contributing
 
