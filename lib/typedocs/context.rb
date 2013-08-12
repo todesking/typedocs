@@ -10,7 +10,7 @@ class Typedocs::Context
   end
   def typedef(name, definition)
     raise ArgumentError, "Invalid user-defined type name: #{name}" unless self.class.valid_udt_name?(name)
-    @specs[name.to_s] = Typedocs::Parser.new(@klass, definition).parse(:type)
+    @specs[name.to_s] = Typedocs::Parser.new.parse(@klass, definition, :type)
   end
   def defined_type!(name)
     self_defined_type(name) || outer_defined_type(name) || (raise Typedocs::NoSuchType, "Type not found in #{@klass.name}: #{name}")

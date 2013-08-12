@@ -181,7 +181,7 @@ module Typedocs
   def self.create_method_spec(klass, name, tdoc_arg)
     case tdoc_arg
     when String
-      Typedocs::Parser.new(klass, tdoc_arg).parse
+      Typedocs::Parser.new.parse(klass, tdoc_arg)
     when :inherit
       Typedocs.super_method_spec(klass, name) || (raise NoSuchMethod, "can't find typedoc for super method: #{klass}##{name}")
     else

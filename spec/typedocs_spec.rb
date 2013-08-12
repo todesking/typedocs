@@ -2,7 +2,7 @@ load File.join(File.dirname(__FILE__), 'spec_helper.rb')
 
 describe Typedocs::Parser do
   def parse(src)
-    Typedocs::Parser.new(::Object, src).parse
+    Typedocs::Parser.new.parse(::Object, src)
   end
   describe 'parsing single validation' do
     def spec_for(src)
@@ -230,7 +230,7 @@ end
 
 describe Typedocs::MethodSpec do
   def parse(src)
-    Typedocs::Parser.new(::Object, src).parse
+    Typedocs::Parser.new.parse(::Object, src)
   end
   def ok(*args,&block)
     case args.last
