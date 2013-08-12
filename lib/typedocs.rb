@@ -17,10 +17,17 @@ module Typedocs
   end
   initialize!
 
+  def self.ensure_klass(obj, klass)
+    raise ArgumentError, "Expected #{klass.name} but #{obj.inspect}" unless obj.kind_of?(klass)
+  end
+
   module MethodSpec
     class AnyOf
       # [MethodSpec::Single] ->
       def initialize(specs)
+        specs.each do|spec|
+          Typedocs.ensure_klass(spec, Typedocs::MethodSpec::Single)
+        end
         @specs = specs
       end
 
@@ -43,11 +50,18 @@ module Typedocs
         spec.validate_retval ret
         ret
       end
+
+      def description
+        @specs.map(&:description).join(' || ')
+      end
     end
 
     class Single
       # ArgumentsSpec -> ArgumentSpec -> ArgumentSpec ->
       def initialize(args_spec, block_spec, retval_spec)
+        Typedocs.ensure_klass(args_spec, Typedocs::ArgumentsSpec)
+        Typedocs.ensure_klass(block_spec, Typedocs::BlockSpec)
+        Typedocs.ensure_klass(retval_spec, Typedocs::ArgumentSpec)
         @arguments_spec = args_spec
         @block_spec = block_spec
         @retval_spec = retval_spec
@@ -83,6 +97,60 @@ module Typedocs
 
       def validate_retval(ret)
         raise Typedocs::RetValError, retval_spec.error_message_for(ret) unless retval_spec.valid?(ret)
+      end
+
+      def description
+        s = ''
+        s << arguments_spec.description
+        s << " -> " unless arguments_spec.empty?
+        s << block_spec.description_with_arrow
+        s << "#{retval_spec.description}"
+      end
+    end
+  end
+
+  class BlockSpec
+    def initialize(type)
+      @type = type
+    end
+    def valid?(block)
+      case block
+      when nil
+        return @type == :opt || @type == :none
+      when Proc
+        return @type == :opt || @type == :req
+      else
+        raise 'maybe typedocs bug'
+      end
+    end
+    def error_message_for(block)
+      raise ArgumentError if valid?(block)
+      case @type
+      when :req
+        "Block not given"
+      when :none
+        "Block not allowed"
+      else
+        raise 'maybe typedocs bug'
+      end
+    end
+    def description
+      case @type
+      when :req
+        '&'
+      when :opt
+        '?&'
+      when :none
+        ''
+      else
+        raise "Invalid type: #{@type}"
+      end
+    end
+    def description_with_arrow
+      if @type == :none
+        ''
+      else
+        "#{description} -> "
       end
     end
   end

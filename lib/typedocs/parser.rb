@@ -1,3 +1,8 @@
+class Typedocs::Parser; end
+
+require 'typedocs/parser/ast_builder'
+require 'typedocs/parser/object_builder'
+
 class Typedocs::Parser
   def initialize klass, src
     @klass = klass
@@ -5,7 +10,23 @@ class Typedocs::Parser
   end
 
   def parse
-    return read_method_spec!
+    ast = Typedocs::Parser::ASTBuilder.new
+    obj = Typedocs::Parser::ObjectBuilder.create_builder_for(@klass)
+
+    result =
+      begin
+        obj.apply ast.parse(@src.string)
+      rescue Parslet::ParseFailed => e
+        raise e.cause.ascii_tree
+      rescue ArgumentError => e
+        error = StandardError.new("Parse error: Maybe parser's bug. Input=#{@src.string.inspect}, Error = #{e}")
+        error.set_backtrace e.backtrace
+        raise error
+      end
+    if result.is_a?(Hash)
+      raise "Parse error: Maybe parser's bug. Input=#{@src.string.inspect}, Result=#{result.inspect}"
+    end
+    result
   end
 
   private

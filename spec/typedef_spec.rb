@@ -50,6 +50,7 @@ describe 'Typedocs.typedef' do
             tdoc "@ConfigHash"
             def illegal; {}; end
           end
+          Typedocs.context(@ns::B).defined_type!("@ConfigHash")
         }.to raise_error Typedocs::NoSuchType
       end
       it 'should not referable from other type' do
@@ -67,6 +68,7 @@ describe 'Typedocs.typedef' do
             tdoc "@ConfigHash"
             def illegal; {}; end
           end
+          Typedocs.context(@ns::C).defined_type!("@ConfigHash")
         }.to raise_error Typedocs::NoSuchType
       end
     end

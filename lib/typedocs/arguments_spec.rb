@@ -13,6 +13,9 @@ class Typedocs::ArgumentsSpec
     @specs = []
     @current = nil
   end
+  def empty?
+    @specs.empty?
+  end
   def valid?(args)
     matched = match(args)
     matched && matched.all? {|arg, spec| spec.valid? arg}
@@ -23,7 +26,20 @@ class Typedocs::ArgumentsSpec
     "Expected: #{description}. Errors: #{errors.map{|arg,spec|spec.error_message_for(arg)}.join(' ||| ')}"
   end
   def description
-    @specs.map{|t,s|s}.flatten(1).map(&:description).join(' -> ')
+    @specs.flat_map{|t,s|
+      attr =
+        case t
+        when :req
+          ''
+        when :opt
+          '?'
+        when :res
+          '*'
+        else
+          raise
+        end
+      s.map{|spec| "#{attr}#{spec.description}" }
+    }.join(' -> ')
   end
   def add_required(arg_spec)
     _add :req, arg_spec
@@ -98,6 +114,7 @@ class Typedocs::ArgumentsSpec
     end
   end
   def _add(type,spec)
+    Typedocs.ensure_klass(spec, Typedocs::ArgumentSpec)
     if @current == type
       @specs.last[1].push spec
     else
