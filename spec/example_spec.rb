@@ -78,23 +78,6 @@ describe 'Usage examples' do
       end
     end
   end
-  describe 'Disable typedocs' do
-    Typedocs::DSL.do_nothing
-    class Unchecked
-      include Typedocs::DSL
-      tdoc "Integer"
-      def not_integer
-        nil
-      end
-    end
-    Typedocs::DSL.do_anything
-
-    describe do
-      it do
-        Unchecked.new.not_integer.should == nil
-      end
-    end
-  end
   class Initialize
     include Typedocs::DSL
 
