@@ -2,7 +2,7 @@
 
 The goal of the project is to provide user-friendly type annotations for Ruby.
 
-NOTICE: This gem is very veta, any APIs/syntaxes may change in future.
+NOTICE: This gem is very beta, any APIs/syntaxes may change in future.
 
 ## Platform
 
