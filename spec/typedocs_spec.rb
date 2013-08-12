@@ -414,7 +414,7 @@ describe Typedocs::ArgumentSpec do
   end
 end
 
-class ValueEquals
+class ValueEquals < Typedocs::ArgumentSpec
   def initialize(val)
     @val = val
   end
