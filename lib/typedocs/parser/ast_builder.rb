@@ -27,7 +27,7 @@ class Typedocs::Parser::ASTBuilder < Parslet::Parser
   rule(:array) { s('[') >> arg_spec >> s(',') >> s('...') >> s(']') }
   rule(:tuple) { s('[') >> rep1(arg_spec, s(',')).as(:types) >> s(']') }
 
-  rule(:hashes) { t(:hash_t) | t(:hash_v) }
+  rule(:hashes) { t(:hash_v) | t(:hash_t) }
   rule(:hash_t) { s('{') >> arg_spec.as(:key_t) >> s('=>') >> arg_spec.as(:val_t) >> s('}') }
   rule(:hash_v) { s('{') >> rep1(hash_v_entry, s(',')).as(:entries) >> (s(',') >> s('...').as(:anymore)).maybe >> s('}') }
   rule(:hash_v_entry) { values.as(:key_v) >> s("=>") >> arg_spec.as(:val_t) }
