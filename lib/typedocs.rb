@@ -56,6 +56,7 @@ module Typedocs
   end
 
   def self.context(klass)
+    Typedocs.ensure_klass(klass, Module)
     @@contexts[klass] ||= Context.new(klass)
   end
 
