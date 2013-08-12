@@ -52,6 +52,21 @@ class X
 end
 ```
 
+### Type definition
+
+```ruby
+class SomethingBuilder
+  include Typedocs
+  tdoc.typedef "@ConfigHash", "{:attr_1 => Integer, :attr_2 => String}"
+
+  tdoc "@ConfigHash -> Something"
+  def build(config); end
+
+  tdoc "@ConfigHash -> SomeContext -> Something"
+  def build_with_context(config, context); end
+end
+```
+
 ### Grammer
 
 Use `typedocs grammer` command for generate list of grammer.
