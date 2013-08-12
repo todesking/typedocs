@@ -1,3 +1,10 @@
+# Dynamic type-checking is disable unless require 'typedocs/enable'
+unless ::Object.const_defined?('TYPEDOCS_ENABLED')
+  require 'typedocs/fallback/impl'
+  Typedocs = TypedocsFallback
+else
+
+
 module Typedocs; end
 
 require "typedocs/version"
@@ -66,4 +73,6 @@ module Typedocs
 
   class NoSuchMethod < ::StandardError; end
   class NoSuchType < ::StandardError; end
+end
+
 end

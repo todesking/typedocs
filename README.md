@@ -10,9 +10,12 @@ Ruby 1.9/2.0
 
 ## Usage
 
-### Method type annotations
+### Method type annotations with dynamic type checking
 
 ```ruby
+require 'typedocs/enable' # Enable dynamic type-checking
+
+require 'typedocs'
 class X
   include Typedocs::DSL
 
@@ -27,14 +30,11 @@ X.new.square 10
 
 X.new.square '100'
 # Typedocs::TypeMissmatch: Argument x is not Numeric('100')
-
-Typedocs::DSL.do_nothing
-class X
-  include Typedocs::DSL
-
-  tdoc "This text is ignored when Typedocs disabled"
-end
 ```
+
+By default, `require 'typedocs'` define some do-nothing methods.
+For dynamic type-checking, `require 'typedocs/enable'` bereore `require 'typedocs'`.
+For example: `ruby -rtypedocs/enable ./foo.rb`, or require it in `spec_helper.rb`, etc.
 
 ### Example
 ```ruby
