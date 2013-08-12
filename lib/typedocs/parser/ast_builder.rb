@@ -6,12 +6,14 @@ class Typedocs::Parser::ASTBuilder < Parslet::Parser
   rule(:method_spec) { spaces >> rep1(method_spec1, s('||')).as(:method_spec) }
   rule(:method_spec1) { (arg_spec >> s('->')).repeat.as(:arg_specs) >> (block_spec >> s('->')).maybe.as(:block_spec) >> return_spec.maybe.as(:return_spec) }
 
-  rule(:arg_spec) {  type.as(:type) | arg_name.as(:name) >> (s(':') >> type.as(:type)).maybe }
+  rule(:arg_spec) { arg_attr.maybe.as(:attr) >> named_type }
   rule(:arg_name) { v(match['_a-z0-9?!'].repeat(1)) >> spaces }
+  rule(:arg_attr) { match['*?'] }
+  rule(:named_type) {type.as(:type) | arg_name.as(:name) >> (s(':') >> type).maybe.as(:type) }
 
   rule(:block_spec) { s('?').maybe >> s('&') >> arg_name.maybe }
 
-  rule(:return_spec) { arg_spec }
+  rule(:return_spec) { named_type }
 
   rule(:type) { rep1(type1, s('|') >> s('|').absent?) }
   rule(:type1) {

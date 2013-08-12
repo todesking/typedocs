@@ -7,7 +7,7 @@ describe Typedocs::Parser::ASTBuilder do
       {type_name: {value: name}}
     end
     def arg_spec_h(type_name)
-      {type: type_name_h(type_name)}
+      {type: type_name_h(type_name), attr: nil}
     end
     it { should parse('TypeName').as(type_name_h('TypeName')) }
     it { should parse('@DefinedTypeName').as(defined_type_name: {value: 'DefinedTypeName'}) }
@@ -33,14 +33,14 @@ describe Typedocs::Parser::ASTBuilder do
     def type_name_h(name)
       {type_name: v_h(name) }
     end
-    it { should parse('name').as(name: v_h('name')) }
-    it { should parse('name:String').as(name: v_h('name'), type: type_name_h('String')) }
+    it { should parse('name').as(name: v_h('name'), type: nil, attr: nil) }
+    it { should parse('name:String').as(name: v_h('name'), type: type_name_h('String'), attr: nil) }
     it { should parse('name:String|nil') }
     it { should parse('data:{key:String => value:String}') }
-    it { should parse('Integer').as(type: type_name_h('Integer')) }
-    it { pending('NIMPL'); should parse('?String') }
-    it { pending('NIMPL'); should parse('*a:String') }
-    it { pending('NIMPL'); should parse('*a') }
+    it { should parse('Integer').as(type: type_name_h('Integer'), attr: nil) }
+    it { should parse('?String').as(type: type_name_h('String'), attr: '?') }
+    it { should parse('*a:String').as(type: type_name_h('String'), name: {value: 'a'}, attr: '*') }
+    it { should parse('*a').as(name: {value: 'a'}, type: nil, attr: '*') }
   end
 
   describe 'method_spec' do
