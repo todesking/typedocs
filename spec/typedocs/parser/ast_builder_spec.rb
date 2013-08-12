@@ -38,6 +38,9 @@ describe Typedocs::Parser::ASTBuilder do
     it { should parse('name:String|nil') }
     it { should parse('data:{key:String => value:String}') }
     it { should parse('Integer').as(type: type_name_h('Integer')) }
+    it { pending('NIMPL'); should parse('?String') }
+    it { pending('NIMPL'); should parse('*a:String') }
+    it { pending('NIMPL'); should parse('*a') }
   end
 
   describe 'method_spec' do
