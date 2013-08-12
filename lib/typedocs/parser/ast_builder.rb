@@ -20,7 +20,7 @@ class Typedocs::Parser::ASTBuilder < Parslet::Parser
     t(:type_name) | t(:defined_type_name) | t(:any) | t(:void) | t(:array) | t(:tuple) | hashes | values
   }
 
-  rule(:type_name) { v(match['A-Z'] >> match['A-Za-z0-9_'].repeat) >> spaces }
+  rule(:type_name) { str('::').maybe >> v(rep1(match['A-Z'] >> match['A-Za-z0-9_'].repeat, str('::'))) >> spaces }
   rule(:defined_type_name) { str('@') >> type_name }
 
   rule(:any) { s('_') }
