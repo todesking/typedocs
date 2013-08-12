@@ -43,11 +43,21 @@ USAGE: #$0 install-fallback <dir>
 
     return 0
   end,
+  'grammer' => ->(args) do
+    require 'typedocs'
+    require 'typedocs/grammer_printer'
+
+    $stdout.puts "Grammer of Typedosc v#{Typedocs::VERSION}"
+    Typedocs::GrammerPrinter.print_grammer($stdout)
+
+    return 0
+  end,
 }[ARGV[0]]||->(args) do
   $stderr.puts <<-EOS
 USAGE: #$0 <command> <command-args>
   command:
     - install-fallback
+    - grammer
   EOS
   return 1
 end)[ARGV[1..-1]]
