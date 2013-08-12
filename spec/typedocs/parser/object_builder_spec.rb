@@ -10,11 +10,11 @@ describe Typedocs::Parser::ObjectBuilder do
     parser_rule = parser.public_send(parser_rule_name)
     subject.apply(parser_rule.parse(src)).should be_kind_of(expected_klass)
   end
-  def td(parser_rule_name, src, description)
+  def td(parser_rule_name, src, to_source)
     parser_rule = parser.public_send(parser_rule_name)
     obj = subject.apply(parser_rule.parse(src))
     obj.should_not be_kind_of(Hash)
-    obj.description.should == description
+    obj.to_source.should == to_source
   end
   describe 'transform types' do
     it { t(:type, 'Integer', as::TypeIsA) }
@@ -28,7 +28,7 @@ describe Typedocs::Parser::ObjectBuilder do
     describe 'hash_v' do
       subject { super().apply(parser.type.parse('{:a => B}')) }
       it { should be_kind_of(as::HashValue) }
-      its(:description) { should == '{:a => B}' }
+      its(:to_source) { should == '{:a => B}' }
     end
   end
 

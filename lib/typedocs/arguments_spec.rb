@@ -23,9 +23,9 @@ class Typedocs::ArgumentsSpec
   def error_message_for(args)
     matched = match(args)
     errors = matched.select{|arg, spec|!spec.valid?(arg)}
-    "Expected: #{description}. Errors: #{errors.map{|arg,spec|spec.error_message_for(arg)}.join(' ||| ')}"
+    "Expected: #{to_source}. Errors: #{errors.map{|arg,spec|spec.error_message_for(arg)}.join(' ||| ')}"
   end
-  def description
+  def to_source
     @specs.flat_map{|t,s|
       attr =
         case t
@@ -38,7 +38,7 @@ class Typedocs::ArgumentsSpec
         else
           raise
         end
-      s.map{|spec| "#{attr}#{spec.description}" }
+      s.map{|spec| "#{attr}#{spec.to_source}" }
     }.join(' -> ')
   end
   def add_required(arg_spec)

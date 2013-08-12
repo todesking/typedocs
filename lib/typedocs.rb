@@ -51,8 +51,8 @@ module Typedocs
         ret
       end
 
-      def description
-        @specs.map(&:description).join(' || ')
+      def to_source
+        @specs.map(&:to_source).join(' || ')
       end
     end
 
@@ -99,12 +99,12 @@ module Typedocs
         raise Typedocs::RetValError, retval_spec.error_message_for(ret) unless retval_spec.valid?(ret)
       end
 
-      def description
+      def to_source
         s = ''
-        s << arguments_spec.description
+        s << arguments_spec.to_source
         s << " -> " unless arguments_spec.empty?
-        s << block_spec.description_with_arrow
-        s << "#{retval_spec.description}"
+        s << block_spec.to_source_with_arrow
+        s << "#{retval_spec.to_source}"
       end
     end
   end
@@ -134,7 +134,7 @@ module Typedocs
         raise 'maybe typedocs bug'
       end
     end
-    def description
+    def to_source
       case @type
       when :req
         '&'
@@ -146,11 +146,11 @@ module Typedocs
         raise "Invalid type: #{@type}"
       end
     end
-    def description_with_arrow
+    def to_source_with_arrow
       if @type == :none
         ''
       else
-        "#{description} -> "
+        "#{to_source} -> "
       end
     end
   end

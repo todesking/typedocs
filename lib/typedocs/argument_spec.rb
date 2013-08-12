@@ -1,18 +1,18 @@
 class Typedocs::ArgumentSpec
   def error_message_for(obj)
-    "Expected #{self.description}, but #{obj.inspect}"
+    "Expected #{self.to_source}, but #{obj.inspect}"
   end
 
   class Any < self
     def valid?(arg); true; end
-    def description; '_'; end
+    def to_source; '_'; end
     def error_message_for(arg)
       raise "This spec accepts ANY value"
     end
   end
   # TODO: rename to void
   class DontCare < Any
-    def description; '--'; end
+    def to_source; '--'; end
   end
   class TypeIsA < self
     def initialize(klass, name)
@@ -25,7 +25,7 @@ class Typedocs::ArgumentSpec
     def valid?(arg);
       arg.is_a? target_klass
     end
-    def description
+    def to_source
       @name
     end
     private
@@ -81,7 +81,7 @@ class Typedocs::ArgumentSpec
     def valid?(obj)
       obj == @value
     end
-    def description
+    def to_source
       @value.inspect
     end
     def error_message_for(obj)
@@ -98,8 +98,8 @@ class Typedocs::ArgumentSpec
       @specs.size == obj.size &&
       @specs.zip(obj).all?{|spec,elm| spec.valid?(elm)}
     end
-    def description
-      "[#{@specs.map(&:description).join(', ')}]"
+    def to_source
+      "[#{@specs.map(&:to_source).join(', ')}]"
     end
   end
   class Array < self
@@ -110,8 +110,8 @@ class Typedocs::ArgumentSpec
     def valid?(obj)
         obj.is_a?(::Array) && obj.all?{|elm| @spec.valid?(elm)}
     end
-    def description
-      "#{@spec.description}..."
+    def to_source
+      "#{@spec.to_source}..."
     end
   end
   class HashValue < self
@@ -128,8 +128,8 @@ class Typedocs::ArgumentSpec
       (@accept_others || @entries.size == obj.size) &&
       @entries.all? {|key, spec| obj.has_key?(key) && spec.valid?(obj[key]) }
     end
-    def description
-      "{#{@entries.map{|key,value| "#{key.inspect} => #{value.description}"}.join(', ')}#{@accept_others ? ', ...' : ''}}"
+    def to_source
+      "{#{@entries.map{|key,value| "#{key.inspect} => #{value.to_source}"}.join(', ')}#{@accept_others ? ', ...' : ''}}"
     end
   end
   class HashType < self
@@ -142,8 +142,8 @@ class Typedocs::ArgumentSpec
         obj.keys.all?{|k| @key_spec.valid? k} &&
         obj.values.all?{|v| @value_spec.valid? v}
     end
-    def description
-      "{#{@key_spec.description} => #{@value_spec.description}}"
+    def to_source
+      "{#{@key_spec.to_source} => #{@value_spec.to_source}}"
     end
   end
   class Or < self
@@ -157,8 +157,8 @@ class Typedocs::ArgumentSpec
     def valid?(obj)
       @children.any?{|spec| spec.valid? obj}
     end
-    def description
-      "#{@children.map(&:description).join('|')}"
+    def to_source
+      "#{@children.map(&:to_source).join('|')}"
     end
   end
   class UserDefinedType < self
@@ -176,7 +176,7 @@ class Typedocs::ArgumentSpec
     def valid?(arg)
       spec.valid?(arg)
     end
-    def description
+    def to_source
       name
     end
   end
@@ -188,7 +188,7 @@ class Typedocs::ArgumentSpec
     def valid?(obj)
       obj == value
     end
-    def description
+    def to_source
       value.inspect
     end
   end
