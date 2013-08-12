@@ -1,5 +1,7 @@
 # Typedocs : Human/Machine readable method specifications
 
+[![Build Status](https://travis-ci.org/todesking/typedocs.png)](https://travis-ci.org/todesking/typedocs)
+
 The goal of the project is to provide user-friendly type annotations for Ruby.
 
 NOTICE: This gem is very beta, any APIs/syntaxes may change in future.
