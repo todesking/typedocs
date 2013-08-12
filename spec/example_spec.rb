@@ -94,7 +94,7 @@ describe 'Usage examples' do
     end
   end
 
-  class ClassMethods
+  class KlassMethods
     include Typedocs::DSL
 
     tdoc "String->Integer"
@@ -102,12 +102,12 @@ describe 'Usage examples' do
 
     def untyped_instance_method(arg); arg; end
   end
-  describe ClassMethods do
+  describe KlassMethods do
     it do
-      ClassMethods.new.untyped_instance_method(1).should == 1
+      KlassMethods.new.untyped_instance_method(1).should == 1
     end
     it do
-      expect { ClassMethods.class_method(1) }.to raise_error Typedocs::ArgumentError
+      expect { KlassMethods.class_method(1) }.to raise_error Typedocs::ArgumentError
     end
   end
 
