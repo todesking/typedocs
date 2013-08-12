@@ -196,31 +196,29 @@ Or install it yourself as:
 
 ## TODO
 
-    Method spec definitions:
-      hash value accepts unspecified keys: { :key => spec, ...}
-
-    Basic validations:
+    YARD style comment notation
+      # @tdoc A -> B
+      Support YARD standard tag(@param, @return) (Need another parser...)
+    Type spec:
       Block type specification
-      Boolean
-      Values
-        Integer(>0)
-        String(not .empty?)
-        Symbol(:a | :b | :c)
-      Named specs
-        @positive_int
-      Duck typing(callable etc)
+      Preset UDTs
+        @Boolean
+      UDT with dynamic rule
+        typedef(:@Positive) {|v| v > 0 }
+      Duck typing
+    Method spec:
+      Exception
+        String -> Integer !KeyNotFound|IOError
     Skip checking for specific argument
       foo 1,2,skip_validation('3')
-    Exception spec
     Informative error message
     Enable/Disable for specific class
     get typedoc from method
-    Name to complex data structure
     Self hosting
     Re-define existing method's spec
     Auto spec inference(from argument name)
     define from outer
-    attr_accessor
+    Support attr_accessor
 
 
 * * * * *
