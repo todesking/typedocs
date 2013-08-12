@@ -220,6 +220,11 @@ Or install it yourself as:
     define from outer
     Support attr_accessor
 
+## Changes
+
+### 0.0.1
+* Initial release
+
 
 * * * * *
 
