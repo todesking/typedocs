@@ -1,5 +1,3 @@
-require 'strscan'
-
 module Typedocs; end
 
 require "typedocs/version"
