@@ -15,7 +15,7 @@ class Typedocs::Parser::ASTBuilder < Parslet::Parser
 
   rule(:return_spec) { named_type }
 
-  rule(:type) { rep1(type1, s('|') >> s('|').absent?) }
+  rule(:type) { rep1(type1, s('|') >> s('|').absent?).as(:type) }
   rule(:type1) {
     t(:type_name) | t(:defined_type_name) | t(:any) | t(:void) | t(:array) | t(:tuple) | hashes | values
   }
@@ -27,7 +27,7 @@ class Typedocs::Parser::ASTBuilder < Parslet::Parser
   rule(:void) { s('void') }
 
   rule(:array) { s('[') >> named_type >> s(',') >> s('...') >> s(']') }
-  rule(:tuple) { s('[') >> rep1(named_type, s(',')).as(:types) >> s(']') }
+  rule(:tuple) { s('[') >> rep0(named_type, s(',')).as(:types) >> s(']') }
 
   rule(:hashes) { t(:hash_v) | t(:hash_t) }
   rule(:hash_t) { s('{') >> named_type.as(:key_t) >> s('=>') >> named_type.as(:val_t) >> s('}') }
@@ -56,6 +56,10 @@ class Typedocs::Parser::ASTBuilder < Parslet::Parser
 
     def t(rule_name)
       send(rule_name).as(rule_name)
+    end
+
+    def rep0(rule, separator)
+      rep1(rule, separator).repeat(0)
     end
 
     def rep1(rule, separator)

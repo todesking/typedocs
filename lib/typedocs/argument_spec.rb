@@ -1,7 +1,9 @@
 class Typedocs::ArgumentSpec
-  def error_message_for(obj)
-    "Expected #{self.description}, but #{obj.inspect}"
-  end
+  private
+    def error_message_for(obj)
+      "Expected #{self.description}, but #{obj.inspect}"
+    end
+  public
   class Any < self
     def valid?(arg); true; end
     def description; '_'; end
@@ -89,6 +91,7 @@ class Typedocs::ArgumentSpec
   end
   class ArrayAsStruct < self
     def initialize(specs)
+      specs.each {|s| Typedocs.ensure_klass(s, Typedocs::ArgumentSpec) }
       @specs = specs
     end
     def valid?(obj)
@@ -102,6 +105,7 @@ class Typedocs::ArgumentSpec
   end
   class Array < self
     def initialize(spec)
+      Typedocs.ensure_klass(spec, Typedocs::ArgumentSpec)
       @spec = spec
     end
     def valid?(obj)
@@ -114,6 +118,9 @@ class Typedocs::ArgumentSpec
   class HashValue < self
     # [key, spec]... ->
     def initialize(entries, accept_others)
+      entries.each do|k, s|
+        Typedocs.ensure_klass(s, Typedocs::ArgumentSpec)
+      end
       @entries = entries
       @accept_others = accept_others
     end
@@ -142,7 +149,10 @@ class Typedocs::ArgumentSpec
   end
   class Or < self
     def initialize(children)
-      raise ArgumentError, "Children is empth" if children.empty?
+      raise ArgumentError, "Children is empty" if children.empty?
+      children.each do|c|
+        Typedocs.ensure_klass(c, Typedocs::ArgumentSpec)
+      end
       @children = children
     end
     def valid?(obj)

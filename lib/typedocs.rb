@@ -17,10 +17,17 @@ module Typedocs
   end
   initialize!
 
+  def self.ensure_klass(obj, klass)
+    raise ArgumentError, "Expected #{klass.name} but #{obj.inspect}" unless obj.kind_of?(klass)
+  end
+
   module MethodSpec
     class AnyOf
       # [MethodSpec::Single] ->
       def initialize(specs)
+        specs.each do|spec|
+          Typedocs.ensure_klass(spec, Typedocs::MethodSpec::Single)
+        end
         @specs = specs
       end
 
@@ -52,6 +59,9 @@ module Typedocs
     class Single
       # ArgumentsSpec -> ArgumentSpec -> ArgumentSpec ->
       def initialize(args_spec, block_spec, retval_spec)
+        Typedocs.ensure_klass(args_spec, Typedocs::ArgumentsSpec)
+        Typedocs.ensure_klass(block_spec, Typedocs::ArgumentSpec) if block_spec
+        Typedocs.ensure_klass(retval_spec, Typedocs::ArgumentSpec)
         @arguments_spec = args_spec
         @block_spec = block_spec
         @retval_spec = retval_spec

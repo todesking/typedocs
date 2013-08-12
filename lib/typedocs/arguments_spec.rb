@@ -114,6 +114,7 @@ class Typedocs::ArgumentsSpec
     end
   end
   def _add(type,spec)
+    Typedocs.ensure_klass(spec, Typedocs::ArgumentSpec)
     if @current == type
       @specs.last[1].push spec
     else

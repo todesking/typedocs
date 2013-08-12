@@ -33,6 +33,7 @@ describe Typedocs::Parser::ObjectBuilder do
   end
 
   describe 'transform root' do
+    it { td(:root, 'A|B', 'A|B') }
     it { td(:root, 'name:String', 'String') }
     it { td(:root, 'a -> b', '_ -> _') }
     it { td(:root, 'x:A->ret:B || a:A -> b:B -> ret:C', 'A -> B || A -> B -> C') }

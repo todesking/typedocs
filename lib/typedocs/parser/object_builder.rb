@@ -21,6 +21,14 @@ class Typedocs::Parser::ObjectBuilder
       h = Helper
       dc = subtree(:_) # dont care
       dc2 = subtree(:__)
+      mktype = ->(t) {
+        case t
+        when Array
+          as::Or.new(t)
+        else
+          t
+        end
+      }
 
       rule(method_spec: subtree(:ms)) {
         specs = h.array(ms).map {|tree|
@@ -48,17 +56,17 @@ class Typedocs::Parser::ObjectBuilder
       }
 
       # arg
-      rule(type: simple(:t), attr: simple(:attr)) { {t: t, a: attr} }
-      rule(type: simple(:t), name: dc, attr: simple(:attr)) { {t: t, a: attr} }
+      rule(type: subtree(:t), attr: simple(:attr)) { {t: mktype[t], a: attr} }
+      rule(type: subtree(:t), name: dc, attr: simple(:attr)) { {t: mktype[t], a: attr} }
       # return
-      rule(type: simple(:t)) { t }
-      rule(type: simple(:t), name: dc) { t }
+      rule(type: subtree(:t)) { mktype[t] }
+      rule(type: subtree(:t), name: dc) { mktype[t] }
 
-      rule(type_name: val) { as::TypeIsA.new(klass, v) }
-      rule(defined_type_name: val) { as::UserDefinedType2.new(klass, v) }
+      rule(type_name: val) { as::TypeIsA.new(klass, v.to_s) }
+      rule(defined_type_name: val) { as::UserDefinedType2.new(klass, v.to_s) }
       rule(any: dc) { as::Any.new }
       rule(array: simple(:v)) { as::Array.new(v) }
-      rule(tuple: {types: sequence(:vs)}) { as::ArrayAsStruct.new(vs) }
+      rule(tuple: {types: subtree(:vs)}) { as::ArrayAsStruct.new(vs) }
       rule(hash_t: {key_t: simple(:k), val_t: simple(:v)}) { as::HashType.new(k,v) }
       rule(hash_v: {entries: subtree(:entries), anymore: simple(:anymore)}) {
         kvs = h.array(entries).map{|e|
