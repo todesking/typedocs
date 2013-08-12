@@ -72,7 +72,7 @@ class Typedocs::Parser::ObjectBuilder
       rule(type: subtree(:t), name: dc) { mktype[t] }
 
       rule(type_name: val) { as::TypeIsA.new(klass, v.to_s) }
-      rule(defined_type_name: val) { as::UserDefinedType2.new(klass, "@#{v.to_s}") }
+      rule(defined_type_name: val) { as::UserDefinedType.new(klass, "@#{v.to_s}") }
       rule(any: dc) { as::Any.new }
       rule(void: dc) { as::DontCare.new }
       rule(array: simple(:v)) { as::Array.new(v) }

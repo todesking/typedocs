@@ -5,11 +5,12 @@ class Typedocs::Context
 
   def initialize(klass)
     @klass = klass
-    @types = {}
+    # udt_name => spec
+    @specs = {}
   end
   def typedef(name, definition)
     raise ArgumentError, "Invalid user-defined type name: #{name}" unless self.class.valid_udt_name?(name)
-    @types[name.to_s] = Typedocs::ArgumentSpec::UserDefinedType.new(@klass, name, definition)
+    @specs[name.to_s] = Typedocs::Parser.new(@klass, definition).parse(:type)
   end
   def defined_type!(name)
     self_defined_type(name) || outer_defined_type(name) || (raise Typedocs::NoSuchType, "Type not found in #{@klass.name}: #{name}")
@@ -18,7 +19,7 @@ class Typedocs::Context
     self_defined_type(name) || outer_defined_type(name) || parent_defined_type(name)
   end
   def self_defined_type(name)
-    @types[name]
+    @specs[name]
   end
   def outer_defined_type(name)
     return nil unless @klass.name

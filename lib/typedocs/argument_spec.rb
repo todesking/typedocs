@@ -162,21 +162,11 @@ class Typedocs::ArgumentSpec
     end
   end
   class UserDefinedType < self
-    def initialize(klass, name, source)
-      @name = name
-      @spec = Typedocs::Parser.new(klass, source).read_arg_spec!
-    end
-    def valid?(arg)
-      @spec.valid?(arg)
-    end
-  end
-  # TODO: replace UDT
-  class UserDefinedType2 < self
-    def initialize(klass, name)
+    def initialize(klass, name, spec = nil)
       raise ArgumentError, "Invalid UDT name: #{name.inspect}" unless Typedocs::Context.valid_udt_name?(name)
       @klass = klass
       @name = name
-      @spec = nil
+      @spec = spec
     end
     attr_reader :klass
     attr_reader :name

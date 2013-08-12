@@ -9,13 +9,15 @@ class Typedocs::Parser
     @src = StringScanner.new(src)
   end
 
-  def parse
+  def parse(type = :root)
     ast = Typedocs::Parser::ASTBuilder.new
     obj = Typedocs::Parser::ObjectBuilder.create_builder_for(@klass)
 
+    root = ast.public_send(type)
+
     result =
       begin
-        obj.apply ast.parse(@src.string)
+        obj.apply root.parse(@src.string)
       rescue Parslet::ParseFailed => e
         raise e.cause.ascii_tree
       rescue ArgumentError => e
@@ -24,7 +26,7 @@ class Typedocs::Parser
         raise error
       end
     if result.is_a?(Hash)
-      raise "Parse error: Maybe parser's bug. Input=#{@src.string.inspect}, Result=#{result.inspect}"
+      raise "Parse error: Maybe parser's bug or unexpected argument(type: #{type.inspect}). Input=#{@src.string.inspect}, Result=#{result.inspect}"
     end
     result
   end
