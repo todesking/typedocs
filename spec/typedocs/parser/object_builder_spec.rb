@@ -20,8 +20,8 @@ describe Typedocs::Parser::ObjectBuilder do
     it { t(:type, 'Integer', as::TypeIsA) }
     it { t(:type, '@X', as::UserDefinedType2) }
     it { t(:type, '_', as::Any) }
-    it { pending('NIMPL'); t(:type, ':a', as::Value) }
-    it { pending('NIMPL'); t(:type, '"str"', as::Value) }
+    it { t(:type, ':a', as::Value) }
+    it { t(:type, '"str"', as::Value) }
     it { t(:type, '[A, ...]', as::Array) }
     it { t(:type, '[A, B]', as::ArrayAsStruct) }
     it { t(:type, '{A => B}', as::HashType) }

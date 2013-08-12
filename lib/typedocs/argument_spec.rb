@@ -169,5 +169,17 @@ class Typedocs::ArgumentSpec
     def initialize(klass, name)
     end
   end
+  class Value < self
+    def initialize(val)
+      @value = val
+    end
+    attr_reader :value
+    def valid?(obj)
+      obj == value
+    end
+    def description
+      value.inspect
+    end
+  end
 end
 

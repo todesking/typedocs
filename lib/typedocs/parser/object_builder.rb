@@ -64,18 +64,14 @@ class Typedocs::Parser::ObjectBuilder
         kvs = h.array(entries).map{|e|
           k = e[:key_v]
           v = e[:val_t]
-          key_v =
-            if k[:symbol_value]
-              k[:symbol_value][:value].to_sym
-            elsif k[:string_value]
-              k[:string_value][:value]
-            else
-              raise
-            end
+          key_v = k.value
           [key_v, v]
         }
         as::HashValue.new(kvs, !!anymore)
       }
+
+      rule(string_value: val) { as::Value.new(v.to_s) }
+      rule(symbol_value: val) { as::Value.new(v.to_sym) }
     end
   end
 end
