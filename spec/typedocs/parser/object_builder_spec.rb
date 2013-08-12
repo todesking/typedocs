@@ -22,7 +22,7 @@ describe Typedocs::Parser::ObjectBuilder do
     it { t(:type, '_', as::Any) }
     it { t(:type, ':a', as::Value) }
     it { t(:type, '"str"', as::Value) }
-    it { t(:type, '[A, ...]', as::Array) }
+    it { t(:type, '[A...]', as::Array) }
     it { t(:type, '[A, B]', as::ArrayAsStruct) }
     it { t(:type, '{A => B}', as::HashType) }
     describe 'hash_v' do

@@ -17,7 +17,7 @@ describe Typedocs::Parser::ASTBuilder do
     it { should parse(':symbol_value').as(symbol_value: {value: 'symbol_value'}) }
     it { should parse('"string_value"').as(string_value: {value: 'string_value'})}
     it { should parse('[TupleType1, TupleType2]').as(tuple: {types: [named_type_h('TupleType1'), named_type_h('TupleType2')]}) }
-    it { should parse('[ArrayType, ...]').as(array: named_type_h('ArrayType')) }
+    it { should parse('[ArrayType...]').as(array: named_type_h('ArrayType')) }
     it { should parse('{KeyType => ValueType}').as(hash_t: {key_t: named_type_h('KeyType'), val_t: named_type_h('ValueType')}) }
     it { should parse('{:a => B}').as(hash_v: {entries: {key_v: {symbol_value: {value: 'a'}}, val_t: named_type_h('B')}, anymore: nil}) }
     it { should parse('{:a => Integer, "b" => String}').as(hash_v: {entries: [{key_v: {symbol_value: {value: 'a'}}, val_t: named_type_h('Integer')}, {key_v: {string_value: {value: 'b'}}, val_t: named_type_h('String')}], anymore: nil}) }
