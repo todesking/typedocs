@@ -15,7 +15,6 @@ module Typedocs::DSL
       end
 
       def method_added(name)
-        super
         return unless @typedocs_current_def
 
         method_spec = ::Typedocs.create_method_spec(self, name, @typedocs_current_def)
@@ -25,7 +24,6 @@ module Typedocs::DSL
       end
 
       def singleton_method_added(name)
-        super
         return unless @typedocs_current_def
 
         method_spec = ::Typedocs.create_method_spec(self, name, @typedocs_current_def)
