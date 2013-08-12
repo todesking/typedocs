@@ -16,7 +16,7 @@ Gem::Specification.new do |gem|
 
   gem.add_dependency 'parslet'
 
-  %w(rspec simplecov simplecov-vim).each do|dep|
+  %w(rspec simplecov simplecov-vim pry).each do|dep|
     gem.add_development_dependency dep
   end
 end
