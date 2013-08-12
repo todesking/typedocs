@@ -43,6 +43,10 @@ module Typedocs
         spec.validate_retval ret
         ret
       end
+
+      def description
+        @specs.map(&:description).join(' || ')
+      end
     end
 
     class Single
@@ -83,6 +87,14 @@ module Typedocs
 
       def validate_retval(ret)
         raise Typedocs::RetValError, retval_spec.error_message_for(ret) unless retval_spec.valid?(ret)
+      end
+
+      def description
+        s = ''
+        s << arguments_spec.description
+        s << " -> " unless arguments_spec.empty?
+        s << "#{block_spec.description} -> " if block_spec
+        s << "#{retval_spec.description}"
       end
     end
   end

@@ -13,6 +13,9 @@ class Typedocs::ArgumentsSpec
     @specs = []
     @current = nil
   end
+  def empty?
+    @specs.empty?
+  end
   def valid?(args)
     matched = match(args)
     matched && matched.all? {|arg, spec| spec.valid? arg}

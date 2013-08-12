@@ -21,6 +21,21 @@ class Typedocs::Parser::ObjectBuilder
       h = Helper
       dc = subtree(:_) # dont care
 
+      rule(method_spec: subtree(:ms)) {
+        specs = h.array(ms).map {|tree|
+          args_spec = Typedocs::ArgumentsSpec.new
+          tree[:arg_specs].each do|as|
+            args_spec.add_required as
+          end
+          Typedocs::MethodSpec::Single.new(
+            args_spec,
+            tree[:block_spec],
+            tree[:return_spec]
+          )
+        }
+        Typedocs::MethodSpec::AnyOf.new(specs)
+      }
+
       rule(type: simple(:t)) { t }
       rule(type: simple(:t), name: dc) { t }
 

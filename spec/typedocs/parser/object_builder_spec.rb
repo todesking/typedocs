@@ -10,6 +10,10 @@ describe Typedocs::Parser::ObjectBuilder do
     parser_rule = parser.public_send(parser_rule_name)
     subject.apply(parser_rule.parse(src)).should be_kind_of(expected_klass)
   end
+  def td(parser_rule_name, src, description)
+    parser_rule = parser.public_send(parser_rule_name)
+    subject.apply(parser_rule.parse(src)).description.should == description
+  end
   describe 'transform types' do
     it { t(:type, 'Integer', as::TypeIsA) }
     it { t(:type, '@X', as::UserDefinedType2) }
@@ -24,5 +28,10 @@ describe Typedocs::Parser::ObjectBuilder do
       it { should be_kind_of(as::HashValue) }
       its(:description) { should == '{:a => B}' }
     end
+  end
+
+  describe 'transform root' do
+    it { td(:root, 'name:String', 'String') }
+    it { td(:root, 'x:A->ret:B || a:A -> b:B -> ret:C', 'A -> B || A -> B -> C') }
   end
 end

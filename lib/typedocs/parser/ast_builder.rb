@@ -3,7 +3,7 @@ require 'parslet'
 class Typedocs::Parser::ASTBuilder < Parslet::Parser
   root :method_spec
 
-  rule(:method_spec) { spaces >> rep1(method_spec1, s('||')).as(:method_spec1) }
+  rule(:method_spec) { spaces >> rep1(method_spec1, s('||')).as(:method_spec) }
   rule(:method_spec1) { (arg_spec >> s('->')).repeat.as(:arg_specs) >> (block_spec >> s('->')).maybe.as(:block_spec) >> return_spec.maybe.as(:return_spec) }
 
   rule(:arg_spec) {  type.as(:type) | arg_name.as(:name) >> (s(':') >> type.as(:type)).maybe }

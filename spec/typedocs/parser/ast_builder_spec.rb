@@ -46,8 +46,8 @@ describe Typedocs::Parser::ASTBuilder do
   describe 'method_spec' do
     subject { super().method_spec }
     let(:empty_arg_spec) { {arg_specs: [], block_spec: nil, return_spec: nil} }
-    it { should parse('').as(method_spec1: empty_arg_spec) }
-    it { should parse('Integer').as(method_spec1: {arg_specs: [], block_spec: nil, return_spec: {type: {type_name: {value: 'Integer'}}}}) }
+    it { should parse('').as(method_spec: empty_arg_spec) }
+    it { should parse('Integer').as(method_spec: {arg_specs: [], block_spec: nil, return_spec: {type: {type_name: {value: 'Integer'}}}}) }
     it { should parse('_ -> _') }
     it { should parse('_ ->') }
     it { should parse('a -> b -> & ->') }
@@ -55,6 +55,6 @@ describe Typedocs::Parser::ASTBuilder do
     it { should parse('a -> b -> &callback ->') }
     it { should parse('_ -> Integer || Integer') }
     it { should parse('_ -> _ || _ ->') }
-    it { should parse('||').as(method_spec1: [empty_arg_spec, empty_arg_spec]) }
+    it { should parse('||').as(method_spec: [empty_arg_spec, empty_arg_spec]) }
   end
 end
