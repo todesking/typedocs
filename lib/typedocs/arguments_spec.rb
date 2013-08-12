@@ -26,7 +26,20 @@ class Typedocs::ArgumentsSpec
     "Expected: #{description}. Errors: #{errors.map{|arg,spec|spec.error_message_for(arg)}.join(' ||| ')}"
   end
   def description
-    @specs.map{|t,s|s}.flatten(1).map(&:description).join(' -> ')
+    @specs.flat_map{|t,s|
+      attr =
+        case t
+        when :req
+          ''
+        when :opt
+          '?'
+        when :res
+          '*'
+        else
+          raise
+        end
+      s.map{|spec| "#{attr}#{spec.description}" }
+    }.join(' -> ')
   end
   def add_required(arg_spec)
     _add :req, arg_spec

@@ -12,7 +12,9 @@ describe Typedocs::Parser::ObjectBuilder do
   end
   def td(parser_rule_name, src, description)
     parser_rule = parser.public_send(parser_rule_name)
-    subject.apply(parser_rule.parse(src)).description.should == description
+    obj = subject.apply(parser_rule.parse(src))
+    obj.should_not be_kind_of(Hash)
+    obj.description.should == description
   end
   describe 'transform types' do
     it { t(:type, 'Integer', as::TypeIsA) }
@@ -32,6 +34,8 @@ describe Typedocs::Parser::ObjectBuilder do
 
   describe 'transform root' do
     it { td(:root, 'name:String', 'String') }
+    it { td(:root, 'a -> b', '_ -> _') }
     it { td(:root, 'x:A->ret:B || a:A -> b:B -> ret:C', 'A -> B || A -> B -> C') }
+    it { td(:root, 'x:X -> ?y -> *Z ->', 'X -> ?_ -> *Z -> _') }
   end
 end

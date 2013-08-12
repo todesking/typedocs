@@ -26,13 +26,13 @@ class Typedocs::Parser::ASTBuilder < Parslet::Parser
   rule(:any) { s('_') }
   rule(:void) { s('void') }
 
-  rule(:array) { s('[') >> arg_spec >> s(',') >> s('...') >> s(']') }
-  rule(:tuple) { s('[') >> rep1(arg_spec, s(',')).as(:types) >> s(']') }
+  rule(:array) { s('[') >> named_type >> s(',') >> s('...') >> s(']') }
+  rule(:tuple) { s('[') >> rep1(named_type, s(',')).as(:types) >> s(']') }
 
   rule(:hashes) { t(:hash_v) | t(:hash_t) }
-  rule(:hash_t) { s('{') >> arg_spec.as(:key_t) >> s('=>') >> arg_spec.as(:val_t) >> s('}') }
+  rule(:hash_t) { s('{') >> named_type.as(:key_t) >> s('=>') >> named_type.as(:val_t) >> s('}') }
   rule(:hash_v) { s('{') >> rep1(hash_v_entry, s(',')).as(:entries) >> (s(',') >> s('...')).maybe.as(:anymore) >> s('}') }
-  rule(:hash_v_entry) { values.as(:key_v) >> s("=>") >> arg_spec.as(:val_t) }
+  rule(:hash_v_entry) { values.as(:key_v) >> s("=>") >> named_type.as(:val_t) }
 
   rule(:values) { t(:nil_value) | t(:string_value) | t(:symbol_value) }
   rule(:nil_value) { s('nil') }

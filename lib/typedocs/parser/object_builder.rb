@@ -20,22 +20,37 @@ class Typedocs::Parser::ObjectBuilder
       as = Typedocs::ArgumentSpec
       h = Helper
       dc = subtree(:_) # dont care
+      dc2 = subtree(:__)
 
       rule(method_spec: subtree(:ms)) {
         specs = h.array(ms).map {|tree|
           args_spec = Typedocs::ArgumentsSpec.new
           tree[:arg_specs].each do|as|
-            args_spec.add_required as
+            type = as[:t] || Typedocs::ArgumentSpec::Any.new
+            case as[:a]
+            when '*'
+              args_spec.add_rest(type)
+            when '?'
+              args_spec.add_optional(type)
+            when nil
+              args_spec.add_required(type)
+            else
+              raise "Unknown attr: #{as[:a].inspect}"
+            end
           end
           Typedocs::MethodSpec::Single.new(
             args_spec,
             tree[:block_spec],
-            tree[:return_spec]
+            tree[:return_spec] || Typedocs::ArgumentSpec::Any.new
           )
         }
         Typedocs::MethodSpec::AnyOf.new(specs)
       }
 
+      # arg
+      rule(type: simple(:t), attr: simple(:attr)) { {t: t, a: attr} }
+      rule(type: simple(:t), name: dc, attr: simple(:attr)) { {t: t, a: attr} }
+      # return
       rule(type: simple(:t)) { t }
       rule(type: simple(:t), name: dc) { t }
 
