@@ -1,9 +1,8 @@
 class Typedocs::ArgumentSpec
-  private
-    def error_message_for(obj)
-      "Expected #{self.description}, but #{obj.inspect}"
-    end
-  public
+  def error_message_for(obj)
+    "Expected #{self.description}, but #{obj.inspect}"
+  end
+
   class Any < self
     def valid?(arg); true; end
     def description; '_'; end
@@ -170,13 +169,25 @@ class Typedocs::ArgumentSpec
     def valid?(arg)
       @spec.valid?(arg)
     end
-    def description
-      "#{@name} = #{@spec.description}"
-    end
   end
   # TODO: replace UDT
   class UserDefinedType2 < self
     def initialize(klass, name)
+      raise ArgumentError, "Invalid UDT name: #{name.inspect}" unless Typedocs::Context.valid_udt_name?(name)
+      @klass = klass
+      @name = name
+      @spec = nil
+    end
+    attr_reader :klass
+    attr_reader :name
+    def spec
+      @spec ||= Typedocs.context(klass).defined_type!(name)
+    end
+    def valid?(arg)
+      spec.valid?(arg)
+    end
+    def description
+      name
     end
   end
   class Value < self

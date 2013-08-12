@@ -52,7 +52,11 @@ class Typedocs::Parser::ObjectBuilder
             tree[:return_spec] || Typedocs::ArgumentSpec::Any.new
           )
         }
-        Typedocs::MethodSpec::AnyOf.new(specs)
+        if specs.size > 1
+          Typedocs::MethodSpec::AnyOf.new(specs)
+        else
+          specs.first
+        end
       }
 
       # arg
@@ -63,7 +67,7 @@ class Typedocs::Parser::ObjectBuilder
       rule(type: subtree(:t), name: dc) { mktype[t] }
 
       rule(type_name: val) { as::TypeIsA.new(klass, v.to_s) }
-      rule(defined_type_name: val) { as::UserDefinedType2.new(klass, v.to_s) }
+      rule(defined_type_name: val) { as::UserDefinedType2.new(klass, "@#{v.to_s}") }
       rule(any: dc) { as::Any.new }
       rule(array: simple(:v)) { as::Array.new(v) }
       rule(tuple: {types: subtree(:vs)}) { as::ArrayAsStruct.new(vs) }
@@ -80,6 +84,7 @@ class Typedocs::Parser::ObjectBuilder
 
       rule(string_value: val) { as::Value.new(v.to_s) }
       rule(symbol_value: val) { as::Value.new(v.to_sym) }
+      rule(nil_value: dc) { as::Value.new(nil) }
     end
   end
 end

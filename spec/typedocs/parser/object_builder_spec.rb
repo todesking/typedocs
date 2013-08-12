@@ -18,7 +18,7 @@ describe Typedocs::Parser::ObjectBuilder do
   end
   describe 'transform types' do
     it { t(:type, 'Integer', as::TypeIsA) }
-    it { t(:type, '@X', as::UserDefinedType2) }
+    it { td(:type, '@X', '@X') }
     it { t(:type, '_', as::Any) }
     it { t(:type, ':a', as::Value) }
     it { t(:type, '"str"', as::Value) }

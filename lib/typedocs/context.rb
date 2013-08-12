@@ -1,10 +1,14 @@
 class Typedocs::Context
+  def self.valid_udt_name?(name)
+    /\A@[A-Z][a-zA-Z0-9]*\Z/ =~ name.to_s
+  end
+
   def initialize(klass)
     @klass = klass
     @types = {}
   end
   def typedef(name, definition)
-    raise ArgumentError, "Invalid user-defined type name: #{name}" unless /\A@[A-Z][a-zA-Z0-9]*\Z/ =~ name.to_s
+    raise ArgumentError, "Invalid user-defined type name: #{name}" unless self.class.valid_udt_name?(name)
     @types[name.to_s] = Typedocs::ArgumentSpec::UserDefinedType.new(@klass, name, definition)
   end
   def defined_type!(name)

@@ -15,7 +15,7 @@ class Typedocs::Parser::ASTBuilder < Parslet::Parser
 
   rule(:return_spec) { named_type }
 
-  rule(:type) { rep1(type1, s('|') >> s('|').absent?).as(:type) }
+  rule(:type) { rep1(type1, s('|') >> s('|').absent?) }
   rule(:type1) {
     t(:type_name) | t(:defined_type_name) | t(:any) | t(:void) | t(:array) | t(:tuple) | hashes | values
   }
