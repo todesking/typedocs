@@ -325,10 +325,10 @@ describe Typedocs::TypeSpec do
     its(:to_source) { should == '_' }
     it { expect { subject.error_message_for(nil) }.to raise_error }
   end
-  describe '::DontCare' do
-    subject { ns::DontCare.new }
+  describe '::Void' do
+    subject { ns::Void.new }
     it { should be_valid(nil) }
-    its(:to_source) { should == '--' }
+    its(:to_source) { should == 'void' }
     it { expect { subject.error_message_for(nil) }.to raise_error }
   end
   describe '::TypeIsA' do

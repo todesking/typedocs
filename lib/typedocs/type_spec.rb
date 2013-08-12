@@ -25,9 +25,8 @@ class Typedocs::TypeSpec
       raise "This spec accepts ANY value"
     end
   end
-  # TODO: rename to void
-  class DontCare < Any
-    def to_source; '--'; end
+  class Void < Any
+    def to_source; 'void' end
   end
   class TypeIsA < self
     def initialize(klass, name)

@@ -52,7 +52,7 @@ class Typedocs::Parser::ObjectBuilder
               raise "Unknown attr: #{as[:a].inspect}"
             end
           end
-          return_spec = tree[:return_spec] || Typedocs::TypeSpec::Any.new
+          return_spec = tree[:return_spec] || Typedocs::TypeSpec::Void.new
           block_spec =
             tree[:block_spec].tap do|bs|
               break Typedocs::BlockSpec.new(:none, nil) if !bs
@@ -82,7 +82,7 @@ class Typedocs::Parser::ObjectBuilder
       rule(type_name: val) { ts::TypeIsA.new(klass, v.to_s) }
       rule(defined_type_name: val) { ts::UserDefinedType.new(klass, "@#{v.to_s}") }
       rule(any: dc) { ts::Any.new }
-      rule(void: dc) { ts::DontCare.new }
+      rule(void: dc) { ts::Void.new }
       rule(array: simple(:v)) { ts::Array.new(v) }
       rule(tuple: {types: subtree(:vs)}) { ts::ArrayAsStruct.new(vs) }
       rule(hash_t: {key_t: simple(:k), val_t: simple(:v)}) { ts::HashType.new(k,v) }
