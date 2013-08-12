@@ -35,11 +35,10 @@ module Typedocs
     end
 
     class Single
-      # ArgumentsSpec -> ArgumentSpec -> ArgumentSpec ->
       def initialize(args_spec, block_spec, retval_spec)
         Typedocs.ensure_klass(args_spec, Typedocs::ArgumentsSpec)
         Typedocs.ensure_klass(block_spec, Typedocs::BlockSpec)
-        Typedocs.ensure_klass(retval_spec, Typedocs::ArgumentSpec)
+        Typedocs.ensure_klass(retval_spec, Typedocs::TypeSpec)
         @arguments_spec = args_spec
         @block_spec = block_spec
         @retval_spec = retval_spec

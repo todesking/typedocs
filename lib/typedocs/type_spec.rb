@@ -1,6 +1,19 @@
-class Typedocs::ArgumentSpec
+class Typedocs::TypeSpec
   def error_message_for(obj)
     "Expected #{self.to_source}, but #{obj.inspect}"
+  end
+
+  class Named < self
+    def initialize(name, spec)
+      @name = name
+      @spec = spec
+    end
+    attr_reader :name
+    def valid?(arg); spec.valid?(arg); end
+    def to_source; "#{name}:#{spec.to_source}"; end
+    def error_message_for(arg)
+      spec.error_message_for(arg)
+    end
   end
 
   class Any < self
@@ -90,7 +103,7 @@ class Typedocs::ArgumentSpec
   end
   class ArrayAsStruct < self
     def initialize(specs)
-      specs.each {|s| Typedocs.ensure_klass(s, Typedocs::ArgumentSpec) }
+      specs.each {|s| Typedocs.ensure_klass(s, Typedocs::TypeSpec) }
       @specs = specs
     end
     def valid?(obj)
@@ -104,7 +117,7 @@ class Typedocs::ArgumentSpec
   end
   class Array < self
     def initialize(spec)
-      Typedocs.ensure_klass(spec, Typedocs::ArgumentSpec)
+      Typedocs.ensure_klass(spec, Typedocs::TypeSpec)
       @spec = spec
     end
     def valid?(obj)
@@ -118,7 +131,7 @@ class Typedocs::ArgumentSpec
     # [key, spec]... ->
     def initialize(entries, accept_others)
       entries.each do|k, s|
-        Typedocs.ensure_klass(s, Typedocs::ArgumentSpec)
+        Typedocs.ensure_klass(s, Typedocs::TypeSpec)
       end
       @entries = entries
       @accept_others = accept_others
@@ -150,7 +163,7 @@ class Typedocs::ArgumentSpec
     def initialize(children)
       raise ArgumentError, "Children is empty" if children.empty?
       children.each do|c|
-        Typedocs.ensure_klass(c, Typedocs::ArgumentSpec)
+        Typedocs.ensure_klass(c, Typedocs::TypeSpec)
       end
       @children = children
     end

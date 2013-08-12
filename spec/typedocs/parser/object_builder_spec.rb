@@ -3,7 +3,7 @@ require 'spec_helper'
 describe Typedocs::Parser::ObjectBuilder do
   let(:klass) { Class.new }
   let(:parser) { Typedocs::Parser::ASTBuilder.new }
-  let(:as) { Typedocs::ArgumentSpec }
+  let(:ts) { Typedocs::TypeSpec }
   subject { Typedocs::Parser::ObjectBuilder.create_builder_for(klass) }
 
   def t(parser_rule_name, src, expected_klass)
@@ -17,17 +17,17 @@ describe Typedocs::Parser::ObjectBuilder do
     obj.to_source.should == to_source
   end
   describe 'transform types' do
-    it { t(:type, 'Integer', as::TypeIsA) }
+    it { t(:type, 'Integer', ts::TypeIsA) }
     it { td(:type, '@X', '@X') }
-    it { t(:type, '_', as::Any) }
-    it { t(:type, ':a', as::Value) }
-    it { t(:type, '"str"', as::Value) }
-    it { t(:type, '[A...]', as::Array) }
-    it { t(:type, '[A, B]', as::ArrayAsStruct) }
-    it { t(:type, '{A => B}', as::HashType) }
+    it { t(:type, '_', ts::Any) }
+    it { t(:type, ':a', ts::Value) }
+    it { t(:type, '"str"', ts::Value) }
+    it { t(:type, '[A...]', ts::Array) }
+    it { t(:type, '[A, B]', ts::ArrayAsStruct) }
+    it { t(:type, '{A => B}', ts::HashType) }
     describe 'hash_v' do
       subject { super().apply(parser.type.parse('{:a => B}')) }
-      it { should be_kind_of(as::HashValue) }
+      it { should be_kind_of(ts::HashValue) }
       its(:to_source) { should == '{:a => B}' }
     end
   end

@@ -3,7 +3,7 @@ module Typedocs; end
 require "typedocs/version"
 require "typedocs/dsl"
 require "typedocs/parser"
-require "typedocs/argument_spec"
+require "typedocs/type_spec"
 require "typedocs/arguments_spec"
 require "typedocs/block_spec"
 require "typedocs/method_spec"

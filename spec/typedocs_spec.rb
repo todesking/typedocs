@@ -292,7 +292,7 @@ describe Typedocs::MethodSpec do
   end
 end
 
-describe Typedocs::ArgumentSpec::TypeIsA do
+describe Typedocs::TypeSpec::TypeIsA do
   before do
     ::Object.module_eval do
       module A
@@ -307,18 +307,18 @@ describe Typedocs::ArgumentSpec::TypeIsA do
     ::Object.module_eval { remove_const :A }
   end
   it do
-    Typedocs::ArgumentSpec::TypeIsA.new(A::B, 'C').should be_valid(A::B::C.new)
+    Typedocs::TypeSpec::TypeIsA.new(A::B, 'C').should be_valid(A::B::C.new)
   end
   it do
-    Typedocs::ArgumentSpec::TypeIsA.new(A::B, '::A::B::C').should be_valid(A::B::C.new)
+    Typedocs::TypeSpec::TypeIsA.new(A::B, '::A::B::C').should be_valid(A::B::C.new)
   end
 end
 
-module ArgumentSpecSpecSandbox
+module TypeSpecSpecSandbox
 end
-describe Typedocs::ArgumentSpec do
-  let(:sandbox) { ArgumentSpecSpecSandbox }
-  let(:ns) { Typedocs::ArgumentSpec }
+describe Typedocs::TypeSpec do
+  let(:sandbox) { TypeSpecSpecSandbox }
+  let(:ns) { Typedocs::TypeSpec }
   describe '::Any' do
     subject { ns::Any.new }
     it { should be_valid(nil) }
@@ -414,7 +414,7 @@ describe Typedocs::ArgumentSpec do
   end
 end
 
-class ValueEquals < Typedocs::ArgumentSpec
+class ValueEquals < Typedocs::TypeSpec
   def initialize(val)
     @val = val
   end
