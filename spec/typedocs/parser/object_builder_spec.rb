@@ -38,5 +38,6 @@ describe Typedocs::Parser::ObjectBuilder do
     it { td(:root, 'a -> b', '_ -> _') }
     it { td(:root, 'x:A->ret:B || a:A -> b:B -> ret:C', 'A -> B || A -> B -> C') }
     it { td(:root, 'x:X -> ?y -> *Z ->', 'X -> ?_ -> *Z -> _') }
+    it { td(:root, 'a -> ?&b ->', '_ -> ?& -> _') }
   end
 end

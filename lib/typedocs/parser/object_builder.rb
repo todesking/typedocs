@@ -46,11 +46,16 @@ class Typedocs::Parser::ObjectBuilder
               raise "Unknown attr: #{as[:a].inspect}"
             end
           end
-          Typedocs::MethodSpec::Single.new(
-            args_spec,
-            tree[:block_spec],
-            tree[:return_spec] || Typedocs::ArgumentSpec::Any.new
-          )
+          return_spec = tree[:return_spec] || Typedocs::ArgumentSpec::Any.new
+          block_spec =
+            if !tree[:block_spec]
+              Typedocs::BlockSpec.new(:none)
+            elsif tree[:block_spec][:attr] == '?'
+              Typedocs::BlockSpec.new(:opt)
+            else
+              Typedocs::BlockSpec.new(:req)
+            end
+          Typedocs::MethodSpec::Single.new(args_spec, block_spec, return_spec)
         }
         if specs.size > 1
           Typedocs::MethodSpec::AnyOf.new(specs)

@@ -60,7 +60,7 @@ module Typedocs
       # ArgumentsSpec -> ArgumentSpec -> ArgumentSpec ->
       def initialize(args_spec, block_spec, retval_spec)
         Typedocs.ensure_klass(args_spec, Typedocs::ArgumentsSpec)
-        Typedocs.ensure_klass(block_spec, Typedocs::ArgumentSpec) if block_spec
+        Typedocs.ensure_klass(block_spec, Typedocs::BlockSpec)
         Typedocs.ensure_klass(retval_spec, Typedocs::ArgumentSpec)
         @arguments_spec = args_spec
         @block_spec = block_spec
@@ -103,8 +103,54 @@ module Typedocs
         s = ''
         s << arguments_spec.description
         s << " -> " unless arguments_spec.empty?
-        s << "#{block_spec.description} -> " if block_spec
+        s << block_spec.description_with_arrow
         s << "#{retval_spec.description}"
+      end
+    end
+  end
+
+  class BlockSpec
+    def initialize(type)
+      @type = type
+    end
+    def valid?(block)
+      case block
+      when nil
+        return @type == :opt || @type == :none
+      when Proc
+        return @type == :opt || @type == :req
+      else
+        raise 'maybe typedocs bug'
+      end
+    end
+    def error_message_for(block)
+      raise ArgumentError if valid?(block)
+      case @type
+      when :req
+        "Block not given"
+      when :none
+        "Block not allowed"
+      else
+        raise 'maybe typedocs bug'
+      end
+    end
+    def description
+      case @type
+      when :req
+        '&'
+      when :opt
+        '?&'
+      when :none
+        ''
+      else
+        raise "Invalid type: #{@type}"
+      end
+    end
+    def description_with_arrow
+      if @type == :none
+        ''
+      else
+        "#{description} -> "
       end
     end
   end

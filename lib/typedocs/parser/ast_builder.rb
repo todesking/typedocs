@@ -11,7 +11,7 @@ class Typedocs::Parser::ASTBuilder < Parslet::Parser
   rule(:arg_attr) { match['*?'] }
   rule(:named_type) {type.as(:type) | arg_name.as(:name) >> (s(':') >> type).maybe.as(:type) }
 
-  rule(:block_spec) { s('?').maybe >> s('&') >> arg_name.maybe }
+  rule(:block_spec) { s('?').maybe.as(:attr) >> s('&') >> arg_name.maybe.as(:name) }
 
   rule(:return_spec) { named_type }
 

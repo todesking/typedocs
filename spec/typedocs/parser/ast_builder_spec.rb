@@ -1,14 +1,17 @@
 require 'spec_helper'
 
 describe Typedocs::Parser::ASTBuilder do
+  def v_h(val)
+    {value: val}
+  end
+  def type_name_h(name)
+    {type_name: v_h(name) }
+  end
+  def named_type_h(type_name)
+    {type: type_name_h(type_name)}
+  end
   describe 'type' do
     subject { super().type }
-    def type_name_h(name)
-      {type_name: {value: name}}
-    end
-    def named_type_h(type_name)
-      {type: type_name_h(type_name)}
-    end
     it { should parse('TypeName').as(type_name_h('TypeName')) }
     it { should parse('@DefinedTypeName').as(defined_type_name: {value: 'DefinedTypeName'}) }
     it { should parse('_').as(any: '_') }
@@ -28,12 +31,6 @@ describe Typedocs::Parser::ASTBuilder do
 
   describe 'arg_spec' do
     subject { super().arg_spec }
-    def v_h(val)
-      {value: val}
-    end
-    def type_name_h(name)
-      {type_name: v_h(name) }
-    end
     it { should parse('name').as(name: v_h('name'), type: nil, attr: nil) }
     it { should parse('name:String').as(name: v_h('name'), type: type_name_h('String'), attr: nil) }
     it { should parse('name:String|nil') }
@@ -48,9 +45,11 @@ describe Typedocs::Parser::ASTBuilder do
     subject { super().method_spec }
     let(:empty_arg_spec) { {arg_specs: [], block_spec: nil, return_spec: nil} }
     it { should parse('').as(method_spec: empty_arg_spec) }
-    it { should parse('Integer').as(method_spec: {arg_specs: [], block_spec: nil, return_spec: {type: {type_name: {value: 'Integer'}}}}) }
+    it { should parse('Integer').as(method_spec: {arg_specs: [], block_spec: nil, return_spec: {type: {type_name: v_h('Integer')}}}) }
     it { should parse('_ -> _') }
     it { should parse('_ ->') }
+    it { should parse('& ->').as(method_spec: empty_arg_spec.merge(block_spec: {attr: nil, name: nil})) }
+    it { should parse('?&b ->').as(method_spec: empty_arg_spec.merge(block_spec: {attr: '?', name: v_h('b')})) }
     it { should parse('a -> b -> & ->') }
     it { should parse('a -> b -> ?& ->') }
     it { should parse('a -> b -> &callback ->') }
