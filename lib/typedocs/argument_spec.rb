@@ -9,6 +9,7 @@ class Typedocs::ArgumentSpec
       raise "This spec accepts ANY value"
     end
   end
+  # TODO: rename to void
   class DontCare < Any
     def description; '--'; end
   end
@@ -161,6 +162,11 @@ class Typedocs::ArgumentSpec
     end
     def description
       "#{@name} = #{@spec.description}"
+    end
+  end
+  # TODO: replace UDT
+  class UserDefinedType2 < self
+    def initialize(klass, name)
     end
   end
 end

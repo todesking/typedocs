@@ -17,6 +17,7 @@ class Typedocs::Context
     @types[name]
   end
   def outer_defined_type(name)
+    return nil unless @klass.name
     outer_name = @klass.name.split(/::/)[0..-2]
     unless outer_name.empty?
       outer_klass = outer_name.inject(::Object) {|ns, name| ns.const_get(name) }
