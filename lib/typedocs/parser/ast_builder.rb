@@ -36,7 +36,9 @@ class Typedocs::Parser::ASTBuilder < Parslet::Parser
 
   rule(:values) { t(:nil_value) | t(:string_value) | t(:symbol_value) }
   rule(:nil_value) { s('nil') }
-  rule(:string_value) { s('"') >> v((match['^"'] | str('\\"')).repeat) >> s('"') }
+  rule(:string_value) { string_value_sq | string_value_dq }
+  rule(:string_value_sq) { s("'") >> v((match["^'"] | str("\\'")).repeat) >> s("'") }
+  rule(:string_value_dq) { s('"') >> v((match['^"'] | str('\\"')).repeat) >> s('"') }
   rule(:symbol_value) { str(':') >> v(match['A-Za-z_'] >> match['A-Za-z0-9_'].repeat >> match['?!'].maybe) >> spaces }
 
   rule(:spaces) { match('\\s').repeat }
