@@ -69,6 +69,7 @@ class Typedocs::Parser::ObjectBuilder
       rule(type_name: val) { as::TypeIsA.new(klass, v.to_s) }
       rule(defined_type_name: val) { as::UserDefinedType2.new(klass, "@#{v.to_s}") }
       rule(any: dc) { as::Any.new }
+      rule(void: dc) { as::DontCare.new }
       rule(array: simple(:v)) { as::Array.new(v) }
       rule(tuple: {types: subtree(:vs)}) { as::ArrayAsStruct.new(vs) }
       rule(hash_t: {key_t: simple(:k), val_t: simple(:v)}) { as::HashType.new(k,v) }

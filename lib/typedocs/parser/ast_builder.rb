@@ -24,7 +24,7 @@ class Typedocs::Parser::ASTBuilder < Parslet::Parser
   rule(:defined_type_name) { str('@') >> type_name }
 
   rule(:any) { s('_') }
-  rule(:void) { s('void') }
+  rule(:void) { s('void') | s('--') }
 
   rule(:array) { s('[') >> named_type >> s(',') >> s('...') >> s(']') }
   rule(:tuple) { s('[') >> rep0(named_type, s(',')).as(:types) >> s(']') }
