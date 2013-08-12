@@ -44,6 +44,7 @@ USAGE: #$0 install-fallback <dir>
     return 0
   end,
   'grammer' => ->(args) do
+    require 'typedocs/enable'
     require 'typedocs'
     require 'typedocs/grammer_printer'
 
