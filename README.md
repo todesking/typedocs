@@ -56,6 +56,7 @@ end
 
 Use `typedocs grammer` command for generate list of grammer.
 
+```
          METHOD_SPEC <- SPACES (METHOD_SPEC1 ('||' SPACES METHOD_SPEC1){0, })
               SPACES <- \\s{0, }
         METHOD_SPEC1 <- ((ARG_SPEC '->' SPACES){0, }) ((BLOCK_SPEC '->' SPACES)?) (RETURN_SPEC?)
@@ -83,6 +84,7 @@ Use `typedocs grammer` command for generate list of grammer.
             ARG_NAME <- ([_a-z0-9?!]{1, }) SPACES
           BLOCK_SPEC <- (('?' SPACES)?) '&' SPACES (ARG_NAME?)
          RETURN_SPEC <- NAMED_TYPE
+```
 
 ### Fallbacks
 
