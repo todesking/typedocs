@@ -54,22 +54,35 @@ end
 
 ### Grammer
 
-    method_spec        = method_spec_single ('||' method_spec_single)*
-    method_spec_single = (arg_spec '->')* (block_spec '->')? retval_spec
-    retval_spec        = arg_spec
-    arg_spec           = (arg_spec_name ':')? arg_option? simple_arg_spec ('|' simple_arg_spec)*
-    arg_option         = '?' | '*' # optional / rest
-    simple_arg_spec    = type |  array | array_as_struct | any | hash_value | hash_type | dont_care
-    block_spec         = '&' | '&?'
-    type               = Class or Module name
-    array              = '[' arg_spec '...]'
-    array_as_struct    = '[' arg_spec (',' arg_spec)* ']'
-    hash_value         = '{' hash_element (',' hash_element)* ',...'? '}'
-    hash_element       = hash_key '=>' arg_spec
-    hash_type          = '{' arg_spec '=>' arg_spec '}'
-    hash_key           = 'String' | "String" | :Symbol
-    any                = '*'
-    dont_care          = '' | '--'
+Use `typedocs grammer` command for generate list of grammer.
+
+         METHOD_SPEC <- SPACES (METHOD_SPEC1 ('||' SPACES METHOD_SPEC1){0, })
+              SPACES <- \\s{0, }
+        METHOD_SPEC1 <- ((ARG_SPEC '->' SPACES){0, }) ((BLOCK_SPEC '->' SPACES)?) (RETURN_SPEC?)
+            ARG_SPEC <- (ARG_ATTR?) NAMED_TYPE
+            ARG_ATTR <- [*?]
+          NAMED_TYPE <- TYPE / ARG_NAME ((':' SPACES TYPE)?)
+                TYPE <- TYPE1 ('|' SPACES !('|' SPACES) TYPE1){0, }
+               TYPE1 <- TYPE_NAME / DEFINED_TYPE_NAME / ANY / VOID / ARRAY / TUPLE / HASHES / VALUES
+           TYPE_NAME <- '::'? ([A-Z] [A-Za-z0-9_]{0, } ('::' [A-Z] [A-Za-z0-9_]{0, }){0, }) SPACES
+   DEFINED_TYPE_NAME <- '@' TYPE_NAME
+                 ANY <- '_' SPACES
+                VOID <- 'void' SPACES / '--' SPACES
+               ARRAY <- '[' SPACES NAMED_TYPE '...' SPACES ']' SPACES
+               TUPLE <- '[' SPACES ((NAMED_TYPE (',' SPACES NAMED_TYPE){0, }){0, }) ']' SPACES
+              HASHES <- HASH_V / HASH_T
+              HASH_V <- '{' SPACES (HASH_V_ENTRY (',' SPACES HASH_V_ENTRY){0, }) ((',' SPACES '...' SPACES)?) '}' SPACES
+        HASH_V_ENTRY <- VALUES '=>' SPACES NAMED_TYPE
+              VALUES <- NIL_VALUE / STRING_VALUE / SYMBOL_VALUE
+           NIL_VALUE <- 'nil' SPACES
+        STRING_VALUE <- STRING_VALUE_SQ / STRING_VALUE_DQ
+     STRING_VALUE_SQ <- ''' SPACES (([^'] / '\''){0, }) ''' SPACES
+     STRING_VALUE_DQ <- '"' SPACES (([^\"] / '\"'){0, }) '"' SPACES
+        SYMBOL_VALUE <- ':' ([A-Za-z_] [A-Za-z0-9_]{0, } [?!]?) SPACES
+              HASH_T <- '{' SPACES NAMED_TYPE '=>' SPACES NAMED_TYPE '}' SPACES
+            ARG_NAME <- ([_a-z0-9?!]{1, }) SPACES
+          BLOCK_SPEC <- (('?' SPACES)?) '&' SPACES (ARG_NAME?)
+         RETURN_SPEC <- NAMED_TYPE
 
 ### Fallbacks
 
