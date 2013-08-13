@@ -41,6 +41,12 @@ describe Typedocs::Parser::ASTBuilder do
     it { should parse('*a').as(name: {value: 'a'}, type: nil, attr: '*') }
   end
 
+  describe 'block_spec' do
+    subject { super().block_spec }
+    it { should parse('&').as(attr: nil, name: nil) }
+    it { should parse('?&block').as(attr: '?', name: v_h('block')) }
+  end
+
   describe 'method_spec' do
     subject { super().method_spec }
     let(:empty_arg_spec) { {arg_specs: [], block_spec: nil, return_spec: nil} }
