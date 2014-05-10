@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
   gem.require_paths = ["lib"]
   gem.version       = Typedocs::VERSION
 
-  gem.add_dependency 'parslet'
+  gem.add_dependency 'parslet', '~> 1.5'
 
   %w(rspec simplecov simplecov-vim pry).each do|dep|
     gem.add_development_dependency dep
