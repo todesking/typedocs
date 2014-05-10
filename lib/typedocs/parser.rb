@@ -12,7 +12,15 @@ class Typedocs::Parser
 
     result =
       begin
-        obj.apply root.parse(src)
+        ast = root.parse(src)
+        case type
+        when :root
+          obj.create_method_spec ast
+        when :type
+          obj.create_unnamed_type ast
+        else
+          raise "Invalid type: #{type.inspect}"
+        end
       rescue Parslet::ParseFailed => e
         raise e.cause.ascii_tree
       rescue ArgumentError => e
