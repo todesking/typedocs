@@ -8,8 +8,17 @@ describe Typedocs::Parser::ObjectBuilder do
 
   def t(parser_rule_name, src, expected_klass)
     parser_rule = parser.public_send(parser_rule_name)
-    subject.apply(parser_rule.parse(src)).should be_kind_of(expected_klass)
+
+    actual =
+      case parser_rule_name
+      when :root
+        subject.apply(parser_rule.parse(src))
+      when :type
+        subject.create_unnamed_type(parser_rule.parse(src))
+      end
+    actual.should be_kind_of(expected_klass)
   end
+
   def td(parser_rule_name, src, to_source)
     parser_rule = parser.public_send(parser_rule_name)
     obj = subject.apply(parser_rule.parse(src))
