@@ -196,6 +196,9 @@ Or install it yourself as:
 
 ## TODO
 
+    BUG
+      typedef @A = X|Y ; typedef @B = [@A ...] ; and use @B cause error
+      tdoc '*Symbol -> ?{Symbol => Object} -> _' cause error on arg check phase.
     YARD style comment notation
       # @tdoc A -> B
       Support YARD standard tag(@param, @return) (Need another parser...)
@@ -206,6 +209,7 @@ Or install it yourself as:
       UDT with dynamic rule
         typedef(:@Positive) {|v| v > 0 }
       Duck typing
+      More named type: result:String|not_found:nil
     Method spec:
       Exception
         String -> Integer !KeyNotFound|IOError
